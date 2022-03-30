@@ -23,6 +23,6 @@ ToDo: identify commands and write higher level wrappers to do:
         - get depth image
         - get colored image
         - get information from IMU sensors
-        - set parameters:
+        - set parameters
             - set LIDAR laser intensity
             - set structured light intensity
