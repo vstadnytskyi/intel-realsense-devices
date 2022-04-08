@@ -17,4 +17,15 @@ intel realsense devices
 Features
 --------
 
-* TODO
+ToDo: identify commands and write higher level wrappers to do:
+
+* initalize depth cameras
+        - resolution of depth and colored sensors
+        - frames per second
+        - 
+* get depth image
+* get colored image
+* get information from IMU sensors
+* set parameters
+        - set LIDAR laser intensity
+        - set structured light intensity
