@@ -78,18 +78,48 @@ class Driver():
             self.config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
         else:
             self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        self.config.enable_stream(rs.stream.accel,rs.format.motion_xyz32f,200)
+        self.confing.enable_stream(rs.stream.gyro,rs.format.motion_xyz32f,200)
 
-    def get_images(self):
+    def get_data(self):
         import numpy as np
         frames = self.pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
-
-        # Convert images to numpy arrays
-        depth_image = np.asanyarray(depth_frame.get_data())
-        color_image = np.asanyarray(color_frame.get_data())
-        return {'depth':depth_image,'color': color_image}
+        imu = frames.as_motion_frame().get_motion_data()
         
+        # Convert images to numpy arrays
+        # it is important to copy the array. 
+        #Otherwise it stops returning new frames after 15 images.
+        depth_image = np.copy(np.asanyarray(depth_frame.get_data()))
+        color_image = np.copy(np.asanyarray(color_frame.get_data()))
+        return {'depth':depth_image,'color': color_image,'imu':imu}
+        
+
+    def get_depth_resolution(self):
+        """
+        returns depth resolution of the camera in mm per count
+        In [152]: a = 
+
+
+
+        In [154]: self.device.first_depth_sensor().get_depth_scale?
+        Docstring:
+        get_depth_scale(self: pyrealsense2.pyrealsense2.depth_sensor) -> float
+
+        Retrieves mapping between the units of the depth image and meters.
+        Type:      method
+
+        In [153]: a.get_depth_scale()
+        Out[153]: 0.0002500000118743628
+
+        """
+        result = self.device.first_depth_sensor().get_depth_scale
+        return result
+    depth_resolution = property(get_depth_resolution)
+    
+
+
 
 if __name__ is "__main__":
     from matplotlib import pyplot as plt
