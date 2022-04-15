@@ -34,6 +34,12 @@ class Driver():
         self.device = self.pipeline_profile.get_device()
         self.configure()
         self.pipeline.start(self.config)
+
+    self.start(self):
+        self.pipeline.start(self.config)
+
+    def stop(self):
+        self.pipeline.stop()
         
     def find_devices(self):
         """
@@ -78,22 +84,25 @@ class Driver():
             self.config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
         else:
             self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-        self.config.enable_stream(rs.stream.accel,rs.format.motion_xyz32f,200)
-        self.confing.enable_stream(rs.stream.gyro,rs.format.motion_xyz32f,200)
+        self.config.enable_stream(rs.stream.accel)#,rs.format.motion_xyz32f,200)
+        self.config.enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
 
     def get_data(self):
         import numpy as np
         frames = self.pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
-        imu = frames.as_motion_frame().get_motion_data()
-        
+        imu = frames[2].as_motion_frame().get_motion_data()
+        imu1 = (imu.x,imu.y,imu.z)
+        imu = frames[3].as_motion_frame().get_motion_data()
+        imu2 = (imu.x,imu.y,imu.z)
+        frameN = frames.get_frame_number()
         # Convert images to numpy arrays
         # it is important to copy the array. 
         #Otherwise it stops returning new frames after 15 images.
         depth_image = np.copy(np.asanyarray(depth_frame.get_data()))
         color_image = np.copy(np.asanyarray(color_frame.get_data()))
-        return {'depth':depth_image,'color': color_image,'imu':imu}
+        return {'depth':depth_image,'color': color_image,'imu1':imu1,'imu2':imu2,'frame#':frameN}
         
 
     def get_depth_resolution(self):
