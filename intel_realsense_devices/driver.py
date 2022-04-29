@@ -15,7 +15,7 @@ from time import time, ctime, sleep
 
 
 class Driver():
-    """
+    """ 
     """
 
     def __init__(self):
@@ -29,13 +29,13 @@ class Driver():
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.config.enable_device(serial_number)
-        pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
-        self.pipeline_profile = self.config.resolve(pipeline_wrapper)
+        self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
+        self.pipeline_profile = self.config.resolve(self.pipeline_wrapper)
         self.device = self.pipeline_profile.get_device()
         self.configure()
         self.pipeline.start(self.config)
 
-    self.start(self):
+    def start(self):
         self.pipeline.start(self.config)
 
     def stop(self):
@@ -84,18 +84,22 @@ class Driver():
             self.config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
         else:
             self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-        self.config.enable_stream(rs.stream.accel)#,rs.format.motion_xyz32f,200)
-        self.config.enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
+        #self.config.enable_stream(rs.stream.accel)#,rs.format.motion_xyz32f,200)
+        #self.config.enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
 
     def get_data(self):
         import numpy as np
         frames = self.pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
-        imu = frames[2].as_motion_frame().get_motion_data()
-        imu1 = (imu.x,imu.y,imu.z)
-        imu = frames[3].as_motion_frame().get_motion_data()
-        imu2 = (imu.x,imu.y,imu.z)
+        try:
+            imu = frames[2].as_motion_frame().get_motion_data()
+            imu1 = (imu.x,imu.y,imu.z)
+            imu = frames[3].as_motion_frame().get_motion_data()
+            imu2 = (imu.x,imu.y,imu.z)
+        except:
+            imu1 = (np.nan,np.nan,np.nan)
+            imu2 = (np.nan,np.nan,np.nan)
         frameN = frames.get_frame_number()
         # Convert images to numpy arrays
         # it is important to copy the array. 
