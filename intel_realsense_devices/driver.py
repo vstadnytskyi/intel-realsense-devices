@@ -84,8 +84,14 @@ class Driver():
             self.config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
         else:
             self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-        #self.config.enable_stream(rs.stream.accel)#,rs.format.motion_xyz32f,200)
-        #self.config.enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
+        try:
+            #There is a problem with this part of the code. If I use the configurtation below for LiDAR L515 depth camera, the camera stops working. It cannot obtain any new frames
+            #self.config.enable_stream(rs.stream.accel)#,rs.format.motion_xyz32f,200)
+            #self.config.enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
+            pass
+        except Exception as e:
+            print('during IMU configuratuon the following error occured',e)
+
 
     def get_data(self):
         import numpy as np
@@ -111,23 +117,11 @@ class Driver():
 
     def get_depth_resolution(self):
         """
-        returns depth resolution of the camera in mm per count
-        In [152]: a = 
+        returns depth resolution of the camera in meters per count
 
-
-
-        In [154]: self.device.first_depth_sensor().get_depth_scale?
-        Docstring:
-        get_depth_scale(self: pyrealsense2.pyrealsense2.depth_sensor) -> float
-
-        Retrieves mapping between the units of the depth image and meters.
-        Type:      method
-
-        In [153]: a.get_depth_scale()
-        Out[153]: 0.0002500000118743628
 
         """
-        result = self.device.first_depth_sensor().get_depth_scale
+        result = self.device.first_depth_sensor().get_depth_scale()
         return result
     depth_resolution = property(get_depth_resolution)
     
