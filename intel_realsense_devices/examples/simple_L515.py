@@ -1,82 +1,90 @@
-"""
-Driver for intel realsense devices. This file contains simple wrappers for functions provided by Intel SDK.
-https://github.com/IntelRealSense/librealsense/tree/master/wrappers/python/examples
-https://dev.intelrealsense.com/docs/python2
+# l515 camera test 
 
-some names of variables and functions come Intel SDK
+#NOTE, MAKE SURE TO CHANGE SERIAL NUMBER
 
-Currently supports:
-Intel LiDAR L515
-Intel Depth Camera D435i
-"""
+SERIAL_NUMBER = 'f1231322'
 
-import numpy as np 
-from time import time, ctime, sleep
 import pyrealsense2 as rs
+import numpy as np
+import time
+from PIL import Image as im
 from matplotlib import pyplot as plt
-plt.ion()
+import subprocess
+def initialize_camera():
+    ctx = rs.context()
+    devices = ctx.query_devices()
+    for device in devices:
+        print(' ----- Available devices ----- ')
+        print('  Device PID: ',  device.get_info(rs.camera_info.product_id))
+        print('  Device name: ',  device.get_info(rs.camera_info.name))
+        print('  Serial number: ',  device.get_info(rs.camera_info.serial_number))
+        print('  Firmware version: ',  device.get_info(rs.camera_info.firmware_version))
+        print('  USB: ',  device.get_info(rs.camera_info.usb_type_descriptor))
+        serial=device.get_info(rs.camera_info.serial_number)
+        if serial == SERIAL_NUMBER:
+            dev = device
+        else:
+            print('device not found')
+ 
+    serial=dev.get_info(rs.camera_info.serial_number)
+    # start the frames pipe
+    pipeline = rs.pipeline()
+    conf = rs.config()
+    conf.enable_device(serial)   #test of enable device
+    profile = pipeline.start(conf)
+    print ('camera init complete')
+    time.sleep(2)
+    return pipeline, profile
+pipeline,profile = initialize_camera()
+stream_list =profile.get_streams()
+for i in stream_list:
+    print(f'stream {i}')
+try:
+    for i in range(10):
+        f = pipeline.wait_for_frames()
+        accel = (f[3].as_motion_frame().get_motion_data())
+        gyro =  (f[4].as_motion_frame().get_motion_data())
+        color = f.get_color_frame()
+        infrared = f.get_infrared_frame()
+        depth = f.get_depth_frame()
+        dist = (depth.get_distance(240, 320))
+        color_img = np.asanyarray(color.get_data())
+        ir_img = np.asanyarray(infrared.get_data())
+        depth_img = np.asanyarray(depth.get_data())
+        print('--- --- --- --- --- ---')
+        print("accelerometer: ", accel)
+        print("gyro: ", gyro)
+        print('gyro frame #: ',f[3].get_frame_number())
+        print('distance: ', dist)
+        print('dist frame #: ',f[0].get_frame_number())
+        print('mean color: ', color_img.mean())
+        print('mean depth: ', depth_img.mean())
+        print('mean infrared: ', ir_img.mean())
+        #print('color: ', (col[400,400]))
+        #print(data)
+        #print('col array shape',col.shape)
+        #print('infrared: ', (IRcol[240,320]))
+        #time.sleep(0)
+        #subprocess.check_call('cls',shell=True)
+finally:
+    pass #p.stop()
 
-serial_numbers = ["f1231322"]
-config = {}
-pipeline = {}
-pipeline_wrapper = {}
-pipeline_profile = {}
-device = {}
 
-for serial_number in serial_numbers:
-# Create a context object. This object owns the handles to all connected realsense devices
-    sn = serial_number
-    pipeline[sn] = rs.pipeline()
+plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
 
-    # Configure streams
-    config[sn] = rs.config()
-    config[sn].enable_device(sn)
-    pipeline_wrapper[sn] = rs.pipeline_wrapper(pipeline[sn])
-    pipeline_profile[sn] = config[sn].resolve(pipeline_wrapper[sn])
-    device[sn] = pipeline_profile[sn].get_device()
-    device_serial_number = str(device[sn].get_info(rs.camera_info.serial_number))
-    device_product_line = str(device[sn].get_info(rs.camera_info.product_line))
-    print(device_product_line,device_serial_number)
-    
-    config[sn].enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-    if device_product_line == 'L500':
-        config[sn].enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
-    else:
-        config[sn].enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+plt.figure(figsize = (8,4))
+plt.subplot(131)
+plt.imshow(depth_img)
+plt.title('depth_image')
 
-    pipeline[sn].start(config[sn])
+plt.subplot(132)
+plt.imshow(color_img)
+plt.title('color image')
 
+plt.subplot(133)
+plt.imshow(ir_img)
+plt.title('infrared image')
 
-serial_number = 'f1231322' 
-frames = pipeline[serial_number].wait_for_frames()
-depth_frame = frames.get_depth_frame()
-color_frame = frames.get_color_frame()
-
-# Convert images to numpy arrays
-depth_image = np.asanyarray(depth_frame.get_data())
-color_image = np.asanyarray(color_frame.get_data())
-
-#to plot data
-
-plt.figure(figsize = (24,12))
-plt.subplot(121)
-plt.imshow(depth_image)
-plt.axvline(225)
-plt.axhline(200)
-plt.axhline(200)
-
-plt.subplot(122)
-plt.imshow(color_image)
-t = time()
-plt.figure()
-plt.plot(depth_image[:350,220:225])
-
-t=time()
-
-def save_to(color_image,depth_image, t,filename):
-    # to save data to a hard drive
-    from ubcs_auxiliary.save_load_object import save_to_file
-    save_to_file(filename,{'color':color_image,'depth':depth_image,'time':t})
-
-filename = r'C:\Users\AR-VR lab W1\Documents\Valentyn\data\intel Lidar L515\scratch_lidar_images.txt'
-save_to(color_image,depth_image, t,filename)
+# Orderly exit
+print("Stopping the pipeline...")
+pipeline.stop()
