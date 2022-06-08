@@ -1,4 +1,9 @@
 # l515 camera test 
+
+#NOTE, MAKE SURE TO CHANGE SERIAL NUMBER
+
+SERIAL_NUMBER = 'f1231322'
+
 import pyrealsense2 as rs
 import numpy as np
 import time
@@ -16,7 +21,7 @@ def initialize_camera():
         print('  Firmware version: ',  device.get_info(rs.camera_info.firmware_version))
         print('  USB: ',  device.get_info(rs.camera_info.usb_type_descriptor))
         serial=device.get_info(rs.camera_info.serial_number)
-        if serial == 'f1231322':
+        if serial == SERIAL_NUMBER:
             dev = device
         else:
             print('device not found')
