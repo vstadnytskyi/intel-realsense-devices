@@ -28,20 +28,20 @@ def initialize_camera():
  
     serial=dev.get_info(rs.camera_info.serial_number)
     # start the frames pipe
-    p = rs.pipeline()
+    pipeline = rs.pipeline()
     conf = rs.config()
     conf.enable_device(serial)   #test of enable device
-    prof = p.start(conf)
+    profile = pipeline.start(conf)
     print ('camera init complete')
     time.sleep(2)
-    return p, prof
-p,q = initialize_camera()
-stream_list =q.get_streams()
+    return pipeline, profile
+pipeline,profile = initialize_camera()
+stream_list =profile.get_streams()
 for i in stream_list:
     print(f'stream {i}')
 try:
     for i in range(10):
-        f = p.wait_for_frames()
+        f = pipeline.wait_for_frames()
         accel = (f[3].as_motion_frame().get_motion_data())
         gyro =  (f[4].as_motion_frame().get_motion_data())
         color = f.get_color_frame()
@@ -85,3 +85,6 @@ plt.subplot(133)
 plt.imshow(ir_img)
 plt.title('infrared image')
 
+# Orderly exit
+print("Stopping the pipeline...")
+pipeline.stop()
