@@ -105,15 +105,12 @@ threads = {}
 threads['gyro'] = new_thread(run_get_gyro,pipeline = pipeline,profile = profile)
 threads['accel'] = new_thread(run_get_accel,pipeline = pipeline,profile = profile)
 
-%matplotlib inline
 from time import time, sleep
-import pylab
 from matplotlib import pyplot as plt
-from IPython import display
 def show_live_plotting(N = -1, dt = 1):
-    fig = plt.figure(figsize = (18,24))
+    plt.ion()
+    fig = plt.figure(figsize = (4,6))
     while True:
-        plt.clf()
         gyro_data = buffers['gyro'].get_all()
         accel_data = buffers['accel'].get_all()
         for i in range(3):
@@ -129,9 +126,10 @@ def show_live_plotting(N = -1, dt = 1):
             plt.xlim([-10,0])
             axes = 'xyz'
             plt.title(f'accel: axis = {axes[i]}')
-        display.display(pylab.gcf())
-        display.clear_output(wait=True)
+        plt.pause(0.001)
+        plt.draw()
         sleep(dt)
+        plt.clf()
 
 show_live_plotting(dt = 1)
 
