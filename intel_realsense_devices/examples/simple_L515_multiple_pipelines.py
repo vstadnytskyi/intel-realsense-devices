@@ -1,4 +1,9 @@
-# D435i camera test 
+# l515 camera test 
+
+#NOTE, MAKE SURE TO CHANGE SERIAL NUMBER
+
+SERIAL_NUMBER = 'f1231322'
+
 import pyrealsense2 as rs
 import numpy as np
 import time
