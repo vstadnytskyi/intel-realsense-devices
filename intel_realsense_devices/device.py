@@ -14,6 +14,7 @@ import numpy as np
 from time import time, ctime, sleep
 
 
+
 class Device():
     """ 
     """
@@ -27,6 +28,11 @@ class Device():
     def init(self, configuration):
         """
         import intel real sense driver and initializes the device.
+
+        Circular buffers are:
+        - depth_image
+        - depth_image_timestamp
+
         """
         from intel_realsense_devices.driver import Driver
         driver = Driver()
@@ -38,10 +44,24 @@ class Device():
         buffers = {}
         buffers['depth'] = CircularBuffer(shape = (100,)+depth_image_shape, dtype = depth_image_dtype)
 
-    def read_config_file(self, filename):
-        """
-        opens configuration file save in yaml format and returns dictionary with all the parameters
-        """
+        def read_config_file(self, filename):
+            """reads configuration file and returns dictionary of parameters. The configuration file is created using YAML.
+
+            Parameters
+            ----------
+            filename : string
+                path to configuration file
+
+            Returns
+            -------
+            dictionary
+                dictionary with configuration parameters.
+
+            """
+            import yamp
+            self.config_filename = filename
+            #read yaml file and return dictionary
+            pass
 
     def start(self):
         """
@@ -77,7 +97,11 @@ class Device():
 if __name__ is "__main__":
     from matplotlib import pyplot as plt
     plt.ion()
-    driver = Driver()
-    print("driver.init(serial_number = '139522074713')")
-    print("plt.imshow(driver.get_images()['depth'])")
+    from intel_realsense_devices.device import Device
+    device = Device()
+    device.start()
+    depth_image = device.buffers['depth'].get_last_value()
+    plt.figure()
+    plt.imshow(depth_image)
+
     
