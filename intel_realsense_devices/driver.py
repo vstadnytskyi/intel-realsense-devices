@@ -131,6 +131,11 @@ class Driver():
         pass
     
     def getImages(self):
+        """
+        Setting up a dict containing images that are recived from the pipline
+        Parameters: Nothing
+        Returns: Dict containing images  
+        """
         f = self.pipeline.wait_for_frames()
         accel = (f[3].as_motion_frame().get_motion_data())
         gyro =  (f[4].as_motion_frame().get_motion_data())
