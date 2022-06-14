@@ -10,8 +10,10 @@ Intel LiDAR L515
 Intel Depth Camera D435i
 """
 
+from typing_extensions import Self
 import numpy as np 
 from time import time, ctime, sleep
+import pyrealsense2 as rs
 
 
 class Driver():
@@ -25,7 +27,6 @@ class Driver():
         # Create a context object. This object owns the handles to all connected realsense devices
 
     def init(self,serial_number = ''):
-        import pyrealsense2 as rs
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.config.enable_device(serial_number)
@@ -34,6 +35,7 @@ class Driver():
         self.device = self.pipeline_profile.get_device()
         self.configure()
         self.pipeline.start(self.config)
+        #self.profile = self.pipeline.start(self.config)        
 
     def start(self):
         self.pipeline.start(self.config)
@@ -57,26 +59,7 @@ class Driver():
                 connect_device.append( device_info )
         return connect_device
 
-
-    def enable_device(self,serial_number = ''):
-        """
-        """
-        self.serial_number = serial_number
-        # connected_devices = self.find_devices()
-        # if len(connected_devices) > 0:
-        #     for device in connected_devices:
-        #         print(device)
-        #         if serial_number == device[0]:
-        #             break
-
-        
-
-        print(device)
-       
-        print(f'serial_number = {serial_number}',device )
-
     def configure(self):
-        import pyrealsense2 as rs
         device_serial_number = str(self.device.get_info(rs.camera_info.serial_number))
         device_product_line = str(self.device.get_info(rs.camera_info.product_line))
         self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
@@ -123,6 +106,7 @@ class Driver():
         """
         result = self.device.first_depth_sensor().get_depth_scale()
         return result
+    
     depth_resolution = property(get_depth_resolution)
     
     def get_all_available_options(self):
@@ -145,11 +129,26 @@ class Driver():
         sets laser intensity for L515 depth camera
         """
         pass
+    
+    def getImages(self):
+        f = self.pipeline.wait_for_frames()
+        accel = (f[3].as_motion_frame().get_motion_data())
+        gyro =  (f[4].as_motion_frame().get_motion_data())
+        color = f.get_color_frame()
+        infrared = f.get_infrared_frame()
+        depth = f.get_depth_frame()
+        
+        color_img = np.asanyarray(color.get_data())
+        ir_img = np.asanyarray(infrared.get_data())
+        depth_img = np.asanyarray(depth.get_data())
+        
+        dict_images = {"color": color_img, "depth" : depth_img, "infared" : ir_img}
+        return dict_images
 
 if __name__ is "__main__":
     from matplotlib import pyplot as plt
     plt.ion()
     driver = Driver()
-    print("driver.init(serial_number = '139522074713')")
-    print("plt.imshow(driver.get_images()['depth'])")
+    print(driver.init(serial_number = 'f1320305'))
+    print(plt.imshow(driver.get_images()['depth']))
     
