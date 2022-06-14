@@ -2,7 +2,8 @@
 
 #NOTE, MAKE SURE TO CHANGE SERIAL NUMBER
 
-SERIAL_NUMBER = 'f1231322'
+SERIAL_NUMBER = 'f1320305'
+
 
 import pyrealsense2 as rs
 import numpy as np
@@ -35,6 +36,7 @@ def initialize_camera():
     print ('camera init complete')
     time.sleep(2)
     return pipeline, profile
+
 pipeline,profile = initialize_camera()
 stream_list =profile.get_streams()
 for i in stream_list:
@@ -51,40 +53,77 @@ try:
         color_img = np.asanyarray(color.get_data())
         ir_img = np.asanyarray(infrared.get_data())
         depth_img = np.asanyarray(depth.get_data())
-        print('--- --- --- --- --- ---')
-        print("accelerometer: ", accel)
-        print("gyro: ", gyro)
-        print('gyro frame #: ',f[3].get_frame_number())
-        print('distance: ', dist)
-        print('dist frame #: ',f[0].get_frame_number())
-        print('mean color: ', color_img.mean())
-        print('mean depth: ', depth_img.mean())
-        print('mean infrared: ', ir_img.mean())
-        #print('color: ', (col[400,400]))
-        #print(data)
-        #print('col array shape',col.shape)
-        #print('infrared: ', (IRcol[240,320]))
-        #time.sleep(0)
-        #subprocess.check_call('cls',shell=True)
+        # print('--- --- --- --- --- ---')
+        # print("accelerometer: ", accel)
+        # print("gyro: ", gyro)
+        # print('gyro frame #: ',f[3].get_frame_number())
+        # print('distance: ', dist)
+        # print('dist frame #: ',f[0].get_frame_number())
+        # print('mean color: ', color_img.mean())
+        # print('mean depth: ', depth_img.mean())
+        # print('mean infrared: ', ir_img.mean())
 finally:
     pass #p.stop()
 
 
 plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
 
-plt.figure(figsize = (8,4))
-plt.subplot(131)
-plt.imshow(depth_img)
-plt.title('depth_image')
 
-plt.subplot(132)
-plt.imshow(color_img)
-plt.title('color image')
+# plt.figure(figsize = (8,4))
+# plt.subplot(131)
+# plt.imshow(depth_img)
+# plt.title('depth_image')
 
-plt.subplot(133)
-plt.imshow(ir_img)
-plt.title('infrared image')
+# plt.subplot(132)
+# plt.imshow(color_img)
+# plt.title('color image')
 
-# Orderly exit
-print("Stopping the pipeline...")
-pipeline.stop()
+# plt.subplot(133)
+# plt.imshow(ir_img)
+# plt.title('infrared image')
+
+
+plt.figure(figsize = (10,5))
+
+try:
+    while True:
+        plt.pause(.00001)
+
+        f = pipeline.wait_for_frames()
+        color = f.get_color_frame()
+        infrared = f.get_infrared_frame()
+        depth = f.get_depth_frame()
+        dist = (depth.get_distance(240, 320))
+        color_img = np.asanyarray(color.get_data())
+        ir_img = np.asanyarray(infrared.get_data())
+        depth_img = np.asanyarray(depth.get_data())
+
+        point = (200,300)
+        plt.plot(point[1], point[0], "og", markersize=10)  # og:shorthand for green circle
+        distance = depth_img[point[1],point[0]]
+        print(distance)
+        
+        plt.subplot(131)
+        plt.imshow(depth_img)
+
+        plt.title('Live depth')
+
+        plt.subplot(132)
+        plt.imshow(color_img)
+        plt.title('Live color')
+
+        plt.subplot(133)
+        plt.imshow(ir_img)
+        plt.title('Live infrared') 
+        time.sleep(1)
+
+
+except KeyboardInterrupt:
+    #Orderly exits
+    print("Stopping the pipeline...")
+    pipeline.stop()
+    pass
+    
+
+
+
