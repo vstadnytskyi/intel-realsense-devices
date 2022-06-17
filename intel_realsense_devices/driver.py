@@ -14,7 +14,7 @@ from typing_extensions import Self
 import numpy as np 
 import time
 import pyrealsense2 as rs
-
+from pdb import pm # pm stands for post mortem
 
 class Driver():
     """ 
@@ -33,8 +33,8 @@ class Driver():
         self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
         self.pipeline_profile = self.config.resolve(self.pipeline_wrapper)
         self.device = self.pipeline_profile.get_device()
-        self.configure()
-        self.profile = self.pipeline.start(self.config)   
+        self.profile = self.pipeline.start(self.config) 
+        self.configure() # //causing problems beacsue 
 
 
     def print_device_info(self):
@@ -81,9 +81,11 @@ class Driver():
             self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
         try:
             #There is a problem with this part of the code. If I use the configurtation below for LiDAR L515 depth camera, the camera stops working. It cannot obtain any new frames
-            #self.config.enable_stream(rs.stream.accel)#,rs.format.motion_xyz32f,200)
-            #self.config.enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
-            pass
+            self.config.enable_stream(rs.stream.accel)#,rs.format.motion_xyz32f,200)
+            self.config.enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
+            self.config.enable_stream(rs.stream.infrared)
+            self.config.enable_stream(rs.stream.depth)
+            
         except Exception as e:
             print('during IMU configuratuon the following error occured',e)
 
@@ -156,29 +158,66 @@ class Driver():
         Returns: Dict containing images  
         """
 
-
         f = self.pipeline.wait_for_frames()
-        # accel = (f[3].as_motion_frame().get_motion_data())
-        # gyro =  (f[4].as_motion_frame().get_motion_data())
+        accel = (f[3].as_motion_frame().get_motion_data())
+        gyro =  (f[4].as_motion_frame().get_motion_data())
 
         color = f.get_color_frame()
-        infrared = f.get_infrared_frame(0)
+        infrared = f.get_infrared_frame()
         depth = f.get_depth_frame()
 
         color_img = np.asanyarray(color.get_data())
         ir_img = np.asanyarray(infrared.get_data())
         depth_img = np.asanyarray(depth.get_data())
 
-        return {"color": color_img, "depth" : depth_img, "infared" : ir_img}
+        return {"color": color_img, "depth" : depth_img, "infrared" : ir_img }
         
+    def get_image_dtype(self, frame_type):
+        """ 
+        returns the image data type
+        Parameter: Nothing
+        Returns: image data type
+        """
+        return self.get_images[frame_type].dtype()
+
+    def get_image_shape(self, frame_type):
+        """ 
+        returns the image Shape
+        Parameter: Nothing
+        Returns: image Shape size 
+        """
+        return self.get_images()[frame_type].shape()
+    
+    def live_stream_test(self):
+        """
+        Test that returns a live stream of depth color and infared
+        """
+        plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
+
+        for i in range(10):
+            plt.pause(.0001)
+            plt.subplot(131)
+            plt.imshow(self.get_images()['depth'])
+
+            plt.title('Live depth')
+
+            plt.subplot(132)
+            plt.imshow(self.get_images()['color'])
+            plt.title('Live color')
+
+            plt.subplot(133)
+            plt.imshow(self.get_images()['infrared'])
+            plt.title('Live infrared') 
+            time.sleep(1)
 
 if __name__ == "__main__":
     from matplotlib import pyplot as plt
-    plt.ion()
+    #plt.ion()
     driver = Driver()
     driver.init(serial_number = 'f1320305')
     #driver.print_device_info()
     #plt.imshow(driver.get_images()['depth'])
+    plt.pause(.02)
+    plt.show()
     driver.set_laser_intensity(10)
-
-    
+    driver.live_stream_test()
