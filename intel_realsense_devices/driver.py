@@ -10,12 +10,23 @@ Intel LiDAR L515
 Intel Depth Camera D435i
 """
 
+from tkinter import Image
+from tkinter.tix import IMAGE
 from typing_extensions import Self
+from matplotlib import image
 import numpy as np 
 import time
 import pyrealsense2 as rs
-from pdb import pm # pm stands for post mortem
+from pdb import pm
 
+
+
+DEPTH = "depth"
+COLOR = "color"
+INFRARED = "infrared"
+GYRO = "gyro"
+ACCEL = "accel"
+IMAGES = "images"
 class Driver():
     """ 
     """
@@ -27,14 +38,27 @@ class Driver():
         # Create a context object. This object owns the handles to all connected realsense devices
 
     def init(self,serial_number = ''):
+        self.pipeline = {}
+        self.pipeline[ACCEL] = rs.pipeline()
+        self.pipeline[GYRO] = rs.pipeline()
+        self.pipeline[IMAGE] = rs.pipeline()
         
-        self.pipeline = rs.pipeline()
-        self.config = rs.config()
-        self.config.enable_device(serial_number)
-        # self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
-        # self.pipeline_profile = self.config.resolve(self.pipeline_wrapper)
+        self.conf = {}
+        self.conf[ACCEL] = rs.config()
+        self.conf[GYRO] = rs.config()
+        self.conf[IMAGE] = rs.config()
+        
+        self.profile = {}
+        self.profile[ACCEL] = self.pipeline[ACCEL].start(self.conf[ACCEL])
+        self.profile[GYRO] = self.pipeline[GYRO].start(self.conf[GYRO])
+        self.profile[IMAGE] = self.pipeline[IMAGE].start(self.conf[IMAGE])
+
+        self.conf[IMAGE].enable_device(serial_number)
+        self.conf[GYRO].enable_device(serial_number)
+        
+        self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline[IMAGE])
+        self.pipeline_profile = self.conf[IMAGE].resolve(self.pipeline_wrapper)
         self.device = self.pipeline_profile.get_device()
-        self.profile = self.pipeline.start(self.config) 
         self.configure()
 
 
@@ -75,17 +99,17 @@ class Driver():
     def configure(self):
         device_serial_number = str(self.device.get_info(rs.camera_info.serial_number))
         device_product_line = str(self.device.get_info(rs.camera_info.product_line))
-        self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+        self.conf[IMAGE].enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
         if device_product_line == 'L500':
-            self.config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
+            self.conf[IMAGE].enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
         else:
-            self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+            self.conf[IMAGE].enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
         try:
             #There is a problem with this part of the code. If I use the configurtation below for LiDAR L515 depth camera, the camera stops working. It cannot obtain any new frames
-            self.config.enable_stream(rs.stream.accel)#,rs.format.motion_xyz32f,200)
-            self.config.enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
-            self.config.enable_stream(rs.stream.infrared)
-            self.config.enable_stream(rs.stream.depth)
+            self.conf[ACCEL].enable_stream(rs.stream.accel)#,rs.format.motion_xyz32f,200)
+            self.conf[GYRO].enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
+            self.conf[IMAGE].enable_stream(rs.stream.infrared)
+            self.conf[IMAGE].enable_stream(rs.stream.depth)
             
         except Exception as e:
             print('during IMU configuratuon the following error occured',e)
@@ -148,9 +172,10 @@ class Driver():
             print("Laser power must be between 0- 100")
             return
 
-        dev = self.profile.get_device()
-        depth_sensor = dev.query_sensors()[0]
-        depth_sensor.set_option(rs.option.laser_power, laser_power)
+        for frame_type in self.profile.keys():
+            dev = self.profile[frame_type].get_device()
+            depth_sensor = dev.query_sensors()[0]
+            depth_sensor.set_option(rs.option.laser_power, laser_power)
     
     def get_images(self):
         """
@@ -159,9 +184,7 @@ class Driver():
         Returns: Dict containing images  
         """
 
-        f = self.pipeline.wait_for_frames()
-        accel = (f[3].as_motion_frame().get_motion_data())
-        gyro =  (f[4].as_motion_frame().get_motion_data())
+        f = self.pipeline[IMAGE].wait_for_frames()
 
         color = f.get_color_frame()
         infrared = f.get_infrared_frame()
@@ -171,7 +194,7 @@ class Driver():
         ir_img = np.asanyarray(infrared.get_data())
         depth_img = np.asanyarray(depth.get_data())
 
-        return {"color": color_img, "depth" : depth_img, "infrared" : ir_img }
+        return {"color": color_img, "depth" : depth_img, "infrared" : ir_img}
         
     def get_image_dtype(self, frame_type):
         """ 
@@ -221,4 +244,4 @@ if __name__ == "__main__":
     plt.pause(.02)
     plt.show()
     driver.set_laser_intensity(10)
-    # driver.live_stream_test()
+    driver.live_stream_test()

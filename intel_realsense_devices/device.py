@@ -29,11 +29,9 @@ class Device():
     def __init__(self):
         """
         """
-        # where should the buffer, threads be init
-        
         # Create a context object. This object owns the handles to all connected realsense devices
 
-    def init(self):
+    def init(self, serial_number):
         """
         import intel real sense driver and initializes the device.
 
@@ -44,26 +42,10 @@ class Device():
         """
         from driver import Driver
         self.driver = Driver()
-        self.driver.init(serial_number = 'f1320305')
+        self.driver.init(serial_number)
         
         self.threads = {}
         self.buffers = {}
-        self.profile = {}
-    
-        self.pipeline = {}
-        self.pipeline['accel'] = rs.pipeline()
-        self.pipeline['gyro'] = rs.pipeline()
-        
-        self.conf = {}
-        self.conf['accel'] = rs.config()
-        self.conf['gyro'] = rs.config()
-
-        self.conf['accel'].enable_stream(rs.stream.accel)#, rs.format.motion_xyz32f, 250)
-        self.conf['gyro'].enable_stream(rs.stream.gyro)#, rs.format.motion_xyz32f, 200)
-        
-        self.profile = {}
-        self.profile['accel'] = self.pipeline['accel'].start(self.conf['accel'])
-        self.profile['gyro'] = self.pipeline['gyro'].start(self.conf['gyro'])
         
         # intialialize the circular buffer
         from circular_buffer_numpy.circular_buffer import CircularBuffer
@@ -124,7 +106,7 @@ class Device():
         acquires one set of gyroscope reading and saves them in gyroscope related circular buffer.
         """
 
-        f = self.driver.pipeline.wait_for_frames()
+        f = self.driver.pipeline[GYRO].wait_for_frames()
         gyro = (f[0].as_motion_frame().get_motion_data())
         frameN = f[0].as_motion_frame().frame_number
         t = time()
@@ -136,7 +118,7 @@ class Device():
         acquires one set of gyroscope reading and saves them in gyroscope related circular buffer.
         """
 
-        f = self.pipeline[ACCEL].wait_for_frames()
+        f = self.driver.pipeline[ACCEL].wait_for_frames()
         accel = (f[0].as_motion_frame().get_motion_data())
         frameN = f[0].as_motion_frame().frame_number
         t = time()
@@ -181,7 +163,7 @@ if __name__ == "__main__":
     plt.ion()
     #from intel_realsense_devices.driver import Driver
     device = Device()
-    device.init()
+    device.init("f1320305")
     device.start()
     device.show_live_plotting(dt = 1)
     # depth_image = device.buffers[DEPTH].get_last_value()
