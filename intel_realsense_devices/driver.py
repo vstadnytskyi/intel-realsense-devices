@@ -27,14 +27,15 @@ class Driver():
         # Create a context object. This object owns the handles to all connected realsense devices
 
     def init(self,serial_number = ''):
+        
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.config.enable_device(serial_number)
-        self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
-        self.pipeline_profile = self.config.resolve(self.pipeline_wrapper)
+        # self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
+        # self.pipeline_profile = self.config.resolve(self.pipeline_wrapper)
         self.device = self.pipeline_profile.get_device()
         self.profile = self.pipeline.start(self.config) 
-        self.configure() # //causing problems beacsue 
+        self.configure()
 
 
     def print_device_info(self):
@@ -178,7 +179,7 @@ class Driver():
         Parameter: Nothing
         Returns: image data type
         """
-        return self.get_images[frame_type].dtype()
+        return self.get_images()[frame_type].dtype
 
     def get_image_shape(self, frame_type):
         """ 
@@ -186,11 +187,11 @@ class Driver():
         Parameter: Nothing
         Returns: image Shape size 
         """
-        return self.get_images()[frame_type].shape()
+        return self.get_images()[frame_type].shape
     
     def live_stream_test(self):
         """
-        Test that returns a live stream of depth color and infared
+        Test that plays a live stream of depth color and infared for about 10 seconds
         """
         plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
 
@@ -220,4 +221,4 @@ if __name__ == "__main__":
     plt.pause(.02)
     plt.show()
     driver.set_laser_intensity(10)
-    driver.live_stream_test()
+    # driver.live_stream_test()
