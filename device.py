@@ -102,9 +102,6 @@ class Device():
         self.read_h5py_file(self.h5py_filename) # reads the data
 
     def save_h5py_file(self, filename):
-        """
-        saves the data from the buffers into h5py file
-        """
         with h5py.File(filename, 'w') as f:
             dset = f.create_dataset("gyro", data = self.buffers[GYRO])
             dset = f.create_dataset("accel", data = self.buffers[ACCEL])
@@ -114,9 +111,6 @@ class Device():
         print(dset)
    
     def read_h5py_file(self, filename):
-        """
-        reads the hp5y file, For testing
-        """
         with h5py.File(filename, "r") as f:
             # List all groups
             print("Keys: %s" % f.keys())
@@ -172,9 +166,6 @@ class Device():
             self.run_once_images()
             
     def show_live_plotting(self, N = -1, dt = 1):
-        """
-        shows live plotting of the gyro and accel data
-        """
         plt.ion()
         fig = plt.figure(figsize = (4,6))
         while self.run:
