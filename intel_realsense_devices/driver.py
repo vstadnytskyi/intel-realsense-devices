@@ -34,38 +34,42 @@ class Driver():
     def __init__(self):
         """
         """
-        pass
+        self.pipeline = {}
+        self.profile = {}
+        self.conf = {}
         # Create a context object. This object owns the handles to all connected realsense devices
 
     def init(self,serial_number = ''):
-        self.pipeline = {}
+        """
+        Method for Initalizing classe
+        """
+        # creates the piplines
         self.pipeline[ACCEL] = rs.pipeline()
         self.pipeline[GYRO] = rs.pipeline()
         self.pipeline[IMAGE] = rs.pipeline()
         
-        self.conf = {}
+        # setup the configuration for each frame type
         self.conf[ACCEL] = rs.config()
         self.conf[GYRO] = rs.config()
         self.conf[IMAGE] = rs.config()
         
-        self.profile = {}
-        self.profile[ACCEL] = self.pipeline[ACCEL].start(self.conf[ACCEL])
-        self.profile[GYRO] = self.pipeline[GYRO].start(self.conf[GYRO])
-        self.profile[IMAGE] = self.pipeline[IMAGE].start(self.conf[IMAGE])
-
-        self.conf[IMAGE].enable_device(serial_number)
-        self.conf[GYRO].enable_device(serial_number)
-        
+        # sets up the device 
         self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline[IMAGE])
         self.pipeline_profile = self.conf[IMAGE].resolve(self.pipeline_wrapper)
         self.device = self.pipeline_profile.get_device()
-        self.configure()
+        
+        self.print_device_info() 
+        self.configure() # calls method to configure the device
 
+        self.conf[IMAGE].enable_device(serial_number)
+        self.conf[GYRO].enable_device(serial_number)
+
+        self.start()
 
     def print_device_info(self):
         """
         Prints the device information
-        Paramter : device object
+        Parameter : Nothing
         Returns: Nothings
         """
         print(' ----- Available devices ----- ')
@@ -76,10 +80,20 @@ class Driver():
         print('  USB: ',  self.device.get_info(rs.camera_info.usb_type_descriptor))
 
     def start(self):
-        self.pipeline.start(self.config)
+        """
+        starts the pipelines
+        """
+        self.profile[ACCEL] = self.pipeline[ACCEL].start(self.conf[ACCEL])
+        self.profile[GYRO] = self.pipeline[GYRO].start(self.conf[GYRO])
+        self.profile[IMAGE] = self.pipeline[IMAGE].start(self.conf[IMAGE])
 
     def stop(self):
-        self.pipeline.stop()
+        """
+        stops the pipelines
+        """
+        self.profile[ACCEL] = self.pipeline[ACCEL].stop(self.conf[ACCEL])
+        self.profile[GYRO] = self.pipeline[GYRO].stop(self.conf[GYRO])
+        self.profile[IMAGE] = self.pipeline[IMAGE].stop(self.conf[IMAGE])
         
     def find_devices(self):
         """
@@ -97,19 +111,23 @@ class Driver():
         return connect_device
 
     def configure(self):
+        """
+        Enablles the stream for all configurations of the camera 
+        """
         device_serial_number = str(self.device.get_info(rs.camera_info.serial_number))
         device_product_line = str(self.device.get_info(rs.camera_info.product_line))
         self.conf[IMAGE].enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+
         if device_product_line == 'L500':
             self.conf[IMAGE].enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
         else:
             self.conf[IMAGE].enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
         try:
-            #There is a problem with this part of the code. If I use the configurtation below for LiDAR L515 depth camera, the camera stops working. It cannot obtain any new frames
             self.conf[ACCEL].enable_stream(rs.stream.accel)#,rs.format.motion_xyz32f,200)
             self.conf[GYRO].enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
             self.conf[IMAGE].enable_stream(rs.stream.infrared)
             self.conf[IMAGE].enable_stream(rs.stream.depth)
+            print("Enabled all streams ")
             
         except Exception as e:
             print('during IMU configuratuon the following error occured',e)
@@ -117,7 +135,7 @@ class Driver():
 
     def get_data(self):
         import numpy as np
-        frames = self.pipeline.wait_for_frames()
+        frames = self.pipeline[IMAGE].wait_for_frames()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
         try:
