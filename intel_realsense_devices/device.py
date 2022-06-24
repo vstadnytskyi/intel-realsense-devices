@@ -112,12 +112,13 @@ class Device():
         infrared_data = self.buffers[INFRARED].get_all()
         color_data = self.buffers[COLOR].get_all()
         
+
         with h5py.File(filename, 'w') as f:
             dset = f.create_dataset("gyro", data = gyro_data)
             dset = f.create_dataset("accel", data = accel_data)
-            # dset = f.create_dataset("depth", data = depth_data)
-            # dset = f.create_dataset("color", data = color_data)
-            # dset = f.create_dataset("infrared", data = infrared_data)
+            dset = f.create_dataset("depth", data = depth_data)
+            dset = f.create_dataset("color", data = color_data)
+            dset = f.create_dataset("infrared", data = infrared_data)
         # print(dset)
         f.close()
    
@@ -139,9 +140,11 @@ class Device():
         acquires one set of images and saves them in separate circular buffes.
         """
         img_dict = self.driver.get_images()
-        self.buffers[DEPTH].append(img_dict[DEPTH])
-        self.buffers[COLOR].append(img_dict[COLOR])
-        self.buffers[INFRARED].append(img_dict[INFRARED])
+        
+
+        self.buffers[DEPTH].append(img_dict[DEPTH].reshape((1,) + img_dict[DEPTH].shape))
+        self.buffers[COLOR].append(img_dict[COLOR].reshape((1,) + img_dict[COLOR].shape))
+        self.buffers[INFRARED].append(img_dict[INFRARED].reshape((1,) + img_dict[INFRARED].shape))
             
     def run_once_gyroscope(self):
         """
@@ -218,7 +221,7 @@ if __name__ == "__main__":
     from matplotlib import pyplot as plt
     plt.ion()
     #from intel_realsense_devices.driver import Driver
-    device = Device(config_filename = "config.yaml", h5py_filename = "test.h5py")
+    device = Device(config_filename = "config.yaml", h5py_filename = "testh5py.h5py")
     device.init()
     # device.show_live_plotting(dt = 1)
     device.collect_data(3)
@@ -228,5 +231,10 @@ if __name__ == "__main__":
     # plt.figure()
     # plt.imshow(depth_image)
 
-
+"""
+    gyro and accelerometer in the driver class I had set it up in a way where
+    I didnt follow the the chronological steps in order to recive frames correctly.
+    I spent a lot of time on this, looking back at it
+    I am not sure why I set it up the way I did as it was a simple fix.
     
+"""
