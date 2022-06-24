@@ -41,23 +41,25 @@ class Driver():
 
     def init(self,serial_number = ''):
         """
-        Method for Initalizing classes
+        Method for Initalizing classe
         """
-
+        # creates the piplines
         self.pipeline[ACCEL] = rs.pipeline()
         self.pipeline[GYRO] = rs.pipeline()
         self.pipeline[IMAGE] = rs.pipeline()
         
+        # setup the configuration for each frame type
         self.conf[ACCEL] = rs.config()
         self.conf[GYRO] = rs.config()
         self.conf[IMAGE] = rs.config()
         
-
+        # sets up the device 
         self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline[IMAGE])
         self.pipeline_profile = self.conf[IMAGE].resolve(self.pipeline_wrapper)
         self.device = self.pipeline_profile.get_device()
-        self.print_device_info()
-        self.configure()
+        
+        self.print_device_info() 
+        self.configure() # calls method to configure the device
 
         self.conf[IMAGE].enable_device(serial_number)
         self.conf[GYRO].enable_device(serial_number)
@@ -78,11 +80,17 @@ class Driver():
         print('  USB: ',  self.device.get_info(rs.camera_info.usb_type_descriptor))
 
     def start(self):
+        """
+        starts the pipelines
+        """
         self.profile[ACCEL] = self.pipeline[ACCEL].start(self.conf[ACCEL])
         self.profile[GYRO] = self.pipeline[GYRO].start(self.conf[GYRO])
         self.profile[IMAGE] = self.pipeline[IMAGE].start(self.conf[IMAGE])
 
     def stop(self):
+        """
+        stops the pipelines
+        """
         self.profile[ACCEL] = self.pipeline[ACCEL].stop(self.conf[ACCEL])
         self.profile[GYRO] = self.pipeline[GYRO].stop(self.conf[GYRO])
         self.profile[IMAGE] = self.pipeline[IMAGE].stop(self.conf[IMAGE])
@@ -103,6 +111,9 @@ class Driver():
         return connect_device
 
     def configure(self):
+        """
+        Enablles the stream for all configurations of the camera 
+        """
         device_serial_number = str(self.device.get_info(rs.camera_info.serial_number))
         device_product_line = str(self.device.get_info(rs.camera_info.product_line))
         self.conf[IMAGE].enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)

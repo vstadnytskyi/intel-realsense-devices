@@ -60,7 +60,6 @@ class Device():
         self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
         self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
         
-
         
     def read_config_file(self, config_filename):
         """
@@ -81,6 +80,7 @@ class Device():
         with open(config_filename) as f:
             dict = yaml.safe_load(f)
         self.serial_number = dict["serial_number"]
+        return dict
         
 
     def start(self):
@@ -97,7 +97,8 @@ class Device():
         """
         orderly stop of device operation
         """
-        self.run = False
+        self.run = False 
+        # self.driver.stop() #shuts down the piplines 
         self.save_h5py_file(self.h5py_filename) # saves the data into h5py file
         self.read_h5py_file(self.h5py_filename) # reads the data
 
@@ -105,13 +106,20 @@ class Device():
         """
         saves the data from the buffers into h5py file
         """
+        gyro_data = self.buffers[GYRO].get_all()
+        accel_data = self.buffers[ACCEL].get_all()
+        depth_data = self.buffers[DEPTH].get_all()
+        infrared_data = self.buffers[INFRARED].get_all()
+        color_data = self.buffers[COLOR].get_all()
+        
         with h5py.File(filename, 'w') as f:
-            dset = f.create_dataset("gyro", data = self.buffers[GYRO])
-            dset = f.create_dataset("accel", data = self.buffers[ACCEL])
-            dset = f.create_dataset("depth", data = self.buffers[DEPTH])
-            dset = f.create_dataset("color", data = self.buffers[COLOR])
-            dset = f.create_dataset("infrared", data = self.buffers[INFRARED])
-        print(dset)
+            dset = f.create_dataset("gyro", data = gyro_data)
+            dset = f.create_dataset("accel", data = accel_data)
+            # dset = f.create_dataset("depth", data = depth_data)
+            # dset = f.create_dataset("color", data = color_data)
+            # dset = f.create_dataset("infrared", data = infrared_data)
+        # print(dset)
+        f.close()
    
     def read_h5py_file(self, filename):
         """
@@ -124,7 +132,7 @@ class Device():
 
             # Get the data
             data = list(f[a_group_key])
-            print(data)
+            # print(data)
 
     def run_once_images(self):
         """
@@ -140,7 +148,7 @@ class Device():
         acquires one set of gyroscope reading and saves them in gyroscope related circular buffer.
         """
 
-        f = self.driver.pipelines[GYRO].wait_for_frames()
+        f = self.driver.pipeline[GYRO].wait_for_frames()
         gyro = (f[0].as_motion_frame().get_motion_data())
         frameN = f[0].as_motion_frame().frame_number
         t = time()
@@ -152,7 +160,7 @@ class Device():
         acquires one set of gyroscope reading and saves them in gyroscope related circular buffer.
         """
 
-        f = self.driver.pipelines[ACCEL].wait_for_frames()
+        f = self.driver.pipeline[ACCEL].wait_for_frames()
         accel = (f[0].as_motion_frame().get_motion_data())
         frameN = f[0].as_motion_frame().frame_number
         t = time()
@@ -199,6 +207,11 @@ class Device():
             sleep(dt)
             plt.clf()
 
+    def collect_data(self,time):
+        self.start()
+        for i in range(time):
+            sleep(1)
+        self.stop()
                 
 
 if __name__ == "__main__":
@@ -207,12 +220,10 @@ if __name__ == "__main__":
     #from intel_realsense_devices.driver import Driver
     device = Device(config_filename = "config.yaml", h5py_filename = "test.h5py")
     device.init()
-    device.start()
-    device.show_live_plotting(dt = 1)
-    device.stop()
-    print("End")
+    # device.show_live_plotting(dt = 1)
+    device.collect_data(3)
+
     # depth_image = device.buffers[DEPTH].get_last_value()
-    
     # print(device.buffers[DEPTH])
     # plt.figure()
     # plt.imshow(depth_image)
