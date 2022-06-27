@@ -10,6 +10,7 @@ intel realsense devices Documentation
    :maxdepth: 2
 
    installation
+   driver
    usage
    release-history
    min_versions
