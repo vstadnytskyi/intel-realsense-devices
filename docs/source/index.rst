@@ -11,6 +11,7 @@ intel realsense devices Documentation
 
    installation
    driver
+   device
    usage
    release-history
    min_versions
