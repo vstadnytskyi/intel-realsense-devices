@@ -1,0 +1,19 @@
+    My main focus this week was to create higher level classes for the camera. I did that 
+    through the simple examples I was given.
+
+    I had one big problems this week. My main problem is where I had issues setting up the camera which
+    I had already had working but I broke it by moving things around. Originally I had initialized 
+    and configured the images in the driver class and had initialized gyro and accel in the device class. 
+    I moved gyro and accelerometer in the driver class I had set it up in a way where
+    I didnt follow the the chronological steps in order to recive frames correctly.
+    I spent a lot of time on this, looking back at it I am not sure why I set it up the way 
+    I did as it was a simple fix.
+    
+    When I try to fix bugs or try to fix code that I broke, I find my self thinking its 
+    a easy fix where I continuosly add new code thinking I am fixing it. Instead I am just 
+    making it harder on my self by adding more code to debug. Thoses simple fixes turn into 
+    hours of debugging. I always seem to run into one of thoses bugs on every big project I do.
+    Looking back, it's always best to try and simplify everthing. Either by going back to a previousy 
+    saved working code/restarting from scratch or spending some time early on really understanding 
+    why your code does what it's doing in order to have a good understanding. So you know what to properly 
+    do next instead of just minidlessly writing code you think will fix it.
