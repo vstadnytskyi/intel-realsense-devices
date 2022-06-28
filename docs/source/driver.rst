@@ -23,4 +23,10 @@ To see if there are other devices currently connected to your PC
 
 .. code-block:: python
    
-   driver.find_devices()
+   print(driver.find_devices())
+
+In order to test if your device is connected and color umage and depth piplines are configured run:
+
+.. code-block:: python
+   
+   driver.live_stream_test()

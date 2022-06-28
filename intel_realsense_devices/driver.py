@@ -41,30 +41,53 @@ class Driver():
 
     def init(self,serial_number = ''):
         """
-        Method for Initalizing classe
+        Method for Initalizing camera
         """
-        # creates the piplines
-        self.pipeline[ACCEL] = rs.pipeline()
-        self.pipeline[GYRO] = rs.pipeline()
-        self.pipeline[IMAGE] = rs.pipeline()
-        
-        # setup the configuration for each frame type
-        self.conf[ACCEL] = rs.config()
-        self.conf[GYRO] = rs.config()
-        self.conf[IMAGE] = rs.config()
-        
-        # sets up the device 
-        self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline[IMAGE])
-        self.pipeline_profile = self.conf[IMAGE].resolve(self.pipeline_wrapper)
-        self.device = self.pipeline_profile.get_device()
-        
-        self.print_device_info() 
-        self.configure() # calls method to configure the device
 
-        self.conf[IMAGE].enable_device(serial_number)
-        self.conf[GYRO].enable_device(serial_number)
+        # check if SN matches 
+        if (self.SN_match(serial_number) == False):
+            return
+        else:
+            # creates the piplines
+            self.pipeline[ACCEL] = rs.pipeline()
+            self.pipeline[GYRO] = rs.pipeline()
+            self.pipeline[IMAGE] = rs.pipeline()
+        
+            # sets up the device 
+            self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline[IMAGE])
+            self.pipeline_profile = self.conf[IMAGE].resolve(self.pipeline_wrapper)
+            self.device = self.pipeline_profile.get_device()
 
-        self.start()
+            self.print_device_info() 
+            self.configure() # calls method to configure the device
+            self.start()
+
+    
+    def SN_match(self, serial_number):
+        """
+        returns flag if serial number matches
+        Parameter : serial number
+        Returns: bool 
+        """
+        ctx = rs.context()
+        devices = ctx.query_devices()
+        for device in devices:
+            serial = device.get_info(rs.camera_info.serial_number)
+            if serial == serial_number:
+                print('Device Found')
+               
+                # setup the configuration for each frame type
+                self.conf[ACCEL] = rs.config()
+                self.conf[GYRO] = rs.config()
+                self.conf[IMAGE] = rs.config()      
+                
+                #enable device
+                self.conf[IMAGE].enable_device(serial_number)
+                self.conf[GYRO].enable_device(serial_number)
+
+                return True
+        print('Device not found')
+        return False
 
     def print_device_info(self):
         """
@@ -72,7 +95,7 @@ class Driver():
         Parameter : Nothing
         Returns: Nothings
         """
-        print(' ----- Available devices ----- ')
+        print(' ----- Device ----- ')
         print('  Device PID: ',  self.device.get_info(rs.camera_info.product_id))
         print('  Device name: ',  self.device.get_info(rs.camera_info.name))
         print('  Serial number: ',  self.device.get_info(rs.camera_info.serial_number))
@@ -131,7 +154,12 @@ class Driver():
             
         except Exception as e:
             print('during IMU configuratuon the following error occured',e)
-
+        def hardware_reset(self):
+            """
+            resets hardware
+            """
+            dev = driver.profile["gyro"].get_device()
+            dev.hardware_reset()
 
     def get_data(self):
         import numpy as np
@@ -257,8 +285,7 @@ if __name__ == "__main__":
     #plt.ion()
     driver = Driver()
     driver.init(serial_number = 'f1320305')
-    #driver.print_device_info()
-    #plt.imshow(driver.get_images()['depth'])
+    
     plt.pause(.02)
     plt.show()
     driver.set_laser_intensity(10)

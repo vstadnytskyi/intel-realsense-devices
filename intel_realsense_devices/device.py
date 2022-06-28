@@ -10,6 +10,7 @@ Intel Depth Camera D435i
 The driver 
 """
 
+from turtle import color
 import numpy as np 
 from time import time, ctime, sleep
 import pyrealsense2 as rs
@@ -38,6 +39,7 @@ class Device():
         self.serial_number = ""
         self.read_config_file(config_filename)
         self.h5py_filename = h5py_filename
+
 
     def init(self):
         """
@@ -77,6 +79,9 @@ class Device():
 
         """
         import yaml
+        dict = {}
+        if config_filename == "":
+            return dict 
         with open(config_filename) as f:
             dict = yaml.safe_load(f)
         self.serial_number = dict["serial_number"]
@@ -99,8 +104,7 @@ class Device():
         """
         self.run = False 
         # self.driver.stop() #shuts down the piplines 
-        self.save_h5py_file(self.h5py_filename) # saves the data into h5py file
-        self.read_h5py_file(self.h5py_filename) # reads the data
+
 
     def save_h5py_file(self, filename):
         """
@@ -112,13 +116,14 @@ class Device():
         infrared_data = self.buffers[INFRARED].get_all()
         color_data = self.buffers[COLOR].get_all()
         
+
         with h5py.File(filename, 'w') as f:
             dset = f.create_dataset("gyro", data = gyro_data)
             dset = f.create_dataset("accel", data = accel_data)
-            # dset = f.create_dataset("depth", data = depth_data)
-            # dset = f.create_dataset("color", data = color_data)
-            # dset = f.create_dataset("infrared", data = infrared_data)
-        # print(dset)
+            dset = f.create_dataset("depth", data = depth_data)
+            dset = f.create_dataset("color", data = color_data)
+            dset = f.create_dataset("infrared", data = infrared_data)
+  
         f.close()
    
     def read_h5py_file(self, filename):
@@ -139,9 +144,11 @@ class Device():
         acquires one set of images and saves them in separate circular buffes.
         """
         img_dict = self.driver.get_images()
-        self.buffers[DEPTH].append(img_dict[DEPTH])
-        self.buffers[COLOR].append(img_dict[COLOR])
-        self.buffers[INFRARED].append(img_dict[INFRARED])
+        
+
+        self.buffers[DEPTH].append(img_dict[DEPTH].reshape((1,) + img_dict[DEPTH].shape))
+        self.buffers[COLOR].append(img_dict[COLOR].reshape((1,) + img_dict[COLOR].shape))
+        self.buffers[INFRARED].append(img_dict[INFRARED].reshape((1,) + img_dict[INFRARED].shape))
             
     def run_once_gyroscope(self):
         """
@@ -179,7 +186,7 @@ class Device():
         while self.run:
             self.run_once_images()
             
-    def show_live_plotting(self, N = -1, dt = 1):
+    def show_live_plotting_test(self, N = -1, dt = 1):
         """
         shows live plotting of the gyro and accel data
         """
@@ -208,11 +215,17 @@ class Device():
             plt.clf()
 
     def collect_data(self,time):
-        self.start()
+        self.start() # starts the threads
+       
         for i in range(time):
-            sleep(1)
-        self.stop()
-                
+            sleep(.025)
+        self.stop() # orderely stops the piplines
+        
+        self.save_h5py_file(self.h5py_filename) # saves the data into h5py file
+        self.read_h5py_file(self.h5py_filename) # reads the data
+
+
+
 
 if __name__ == "__main__":
     from matplotlib import pyplot as plt
@@ -220,7 +233,7 @@ if __name__ == "__main__":
     #from intel_realsense_devices.driver import Driver
     device = Device(config_filename = "config.yaml", h5py_filename = "test.h5py")
     device.init()
-    # device.show_live_plotting(dt = 1)
+    # device.show_live_plotting_test(dt = 1)
     device.collect_data(3)
 
     # depth_image = device.buffers[DEPTH].get_last_value()
@@ -228,5 +241,3 @@ if __name__ == "__main__":
     # plt.figure()
     # plt.imshow(depth_image)
 
-
-    
