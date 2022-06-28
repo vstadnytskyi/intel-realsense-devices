@@ -1,1 +1,5 @@
 # List required packages in this file, one per line.
+matplotlib
+numpy
+pyrealsense2
+h5py
