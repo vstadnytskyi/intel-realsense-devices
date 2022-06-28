@@ -23,4 +23,4 @@ To see if there are other devices currently connected to your PC
 
 .. code-block:: python
    
-   driver.find_devices()
+   print(driver.find_devices())

@@ -41,19 +41,25 @@ class Driver():
 
     def init(self,serial_number = ''):
         """
-        Method for Initalizing classe
+        Method for Initalizing camera
         """
 
-        
-        
         # check if SN matches 
         if (self.SN_match(serial_number) == False):
             return
         else:
+            # creates the piplines
+            self.pipeline[ACCEL] = rs.pipeline()
+            self.pipeline[GYRO] = rs.pipeline()
+            self.pipeline[IMAGE] = rs.pipeline()
+        
+            # sets up the device 
+            self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline[IMAGE])
+            self.pipeline_profile = self.conf[IMAGE].resolve(self.pipeline_wrapper)
+            self.device = self.pipeline_profile.get_device()
+
             self.print_device_info() 
             self.configure() # calls method to configure the device
-
-
             self.start()
 
     
@@ -68,28 +74,19 @@ class Driver():
         for device in devices:
             serial = device.get_info(rs.camera_info.serial_number)
             if serial == serial_number:
-                print('device connected')
-
+                print('Device Found')
+               
+                # setup the configuration for each frame type
                 self.conf[ACCEL] = rs.config()
                 self.conf[GYRO] = rs.config()
                 self.conf[IMAGE] = rs.config()      
                 
+                #enable device
                 self.conf[IMAGE].enable_device(serial_number)
                 self.conf[GYRO].enable_device(serial_number)
-                # creates the piplines
-                self.pipeline[ACCEL] = rs.pipeline()
-                self.pipeline[GYRO] = rs.pipeline()
-                self.pipeline[IMAGE] = rs.pipeline()
-                
-                # setup the configuration for each frame type
 
-
-                # sets up the device 
-                self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline[IMAGE])
-                self.pipeline_profile = self.conf[IMAGE].resolve(self.pipeline_wrapper)
-                self.device = self.pipeline_profile.get_device()
                 return True
-        print('device not found')
+        print('Device not found')
         return False
 
     def print_device_info(self):
@@ -288,11 +285,8 @@ if __name__ == "__main__":
     #plt.ion()
     driver = Driver()
     driver.init(serial_number = 'f1320305')
-    #driver.print_device_info()
-    #plt.imshow(driver.get_images()['depth'])
+    
     plt.pause(.02)
     plt.show()
     driver.set_laser_intensity(10)
     driver.live_stream_test()
-
-    #phrase: nasserdocument
