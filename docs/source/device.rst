@@ -38,6 +38,4 @@ In order to test if gyroscope and accelerometer are configured run the following
 .. code-block:: python
    device.show_live_plotting_test(dt = 1)
 
--------------------------
-This is header
--------------------------
+
