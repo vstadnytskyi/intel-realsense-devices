@@ -51,6 +51,8 @@ class Device():
         - depth_image_timestamp
 
         """
+        
+        # from intel_realsense_devices.driver import Driver
         from driver import Driver
         self.driver = Driver()
         self.driver.init(self.serial_number)
@@ -62,7 +64,7 @@ class Device():
         self.buffers[INFRARED] = CircularBuffer(shape = (100,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
         self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
         self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
-        self.buffers[FRAMEN] = CircularBuffer(shape = (100,)+ self.driver.get_image_shape(FRAMEN), dtype = "int") 
+        self.buffers[FRAMEN] = CircularBuffer(shape = (100,), dtype = "int") 
         
     def read_config_file(self, config_filename):
         """
