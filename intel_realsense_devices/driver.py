@@ -22,7 +22,7 @@ COLOR = "color"
 INFRARED = "infrared"
 GYRO = "gyro"
 ACCEL = "accel"
-IMAGES = "images"
+IMAGE = "images"
 FRAMEN = "frameN"
 
 class Driver():
@@ -242,9 +242,8 @@ class Driver():
         ir_img = np.asanyarray(infrared.get_data())
         depth_img = np.asanyarray(depth.get_data())
         FrameN_nparray = np.asanyarray(frameN)
-        print(FrameN_nparray)
 
-        return {"color": color_img, "depth" : depth_img, "infrared" : ir_img , FRAMEN : FrameN_nparray}
+        return {COLOR: color_img, DEPTH : depth_img, INFRARED : ir_img , FRAMEN : FrameN_nparray}
         
     def get_image_dtype(self, frame_type):
         """ 
@@ -282,7 +281,7 @@ class Driver():
             plt.subplot(133)
             plt.imshow(self.get_images()['infrared'])
             plt.title('Live infrared') 
-            time.sleep(1)
+            time.sleep(.00125)
 
 if __name__ == "__main__":
     from matplotlib import pyplot as plt
