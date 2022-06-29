@@ -22,6 +22,7 @@ INFRARED = "infrared"
 GYRO = "gyro"
 ACCEL = "accel"
 IMAGE = "image"
+FRAMEN = "frameN"
 
 
 class Device():
@@ -61,7 +62,7 @@ class Device():
         self.buffers[INFRARED] = CircularBuffer(shape = (100,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
         self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
         self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
-        
+        self.buffers[FRAMEN] = CircularBuffer(shape = (100,)+ self.driver.get_image_shape(FRAMEN), dtype = "int") 
         
     def read_config_file(self, config_filename):
         """
@@ -72,20 +73,14 @@ class Device():
         filename : string
             path to configuration file
 
-        Returns
-        -------
-        dictionary
-            dictionary with configuration parameters.
-
         """
         import yaml
-        dict = {}
+        
         if config_filename == "":
-            return dict 
+            return
         with open(config_filename) as f:
-            dict = yaml.safe_load(f)
-        self.serial_number = dict["serial_number"]
-        return dict
+            self.config_dict = yaml.safe_load(f)
+        self.serial_number = self.config_dict["serial_number"]
         
 
     def start(self):
@@ -103,28 +98,31 @@ class Device():
         orderly stop of device operation
         """
         self.run = False 
-        # self.driver.stop() #shuts down the piplines 
+        self.driver.stop() #shuts down the piplines 
 
 
     def save_h5py_file(self, filename):
         """
         saves the data from the buffers into h5py file
         """
+        # grab all the data in the circular buffer
         gyro_data = self.buffers[GYRO].get_all()
         accel_data = self.buffers[ACCEL].get_all()
         depth_data = self.buffers[DEPTH].get_all()
         infrared_data = self.buffers[INFRARED].get_all()
         color_data = self.buffers[COLOR].get_all()
-        
+        frameN_data = self.buffers[FRAMEN].get_all()
 
+        # write data in the H5PY file
         with h5py.File(filename, 'w') as f:
-            dset = f.create_dataset("gyro", data = gyro_data)
-            dset = f.create_dataset("accel", data = accel_data)
-            dset = f.create_dataset("depth", data = depth_data)
-            dset = f.create_dataset("color", data = color_data)
-            dset = f.create_dataset("infrared", data = infrared_data)
+            dset = f.create_dataset(GYRO, data = gyro_data)
+            dset = f.create_dataset(ACCEL, data = accel_data)
+            dset = f.create_dataset(DEPTH, data = depth_data)
+            dset = f.create_dataset(COLOR, data = color_data)
+            dset = f.create_dataset(INFRARED, data = infrared_data)
+            dset = f.create_dataset(FRAMEN, data = infrared_data)
   
-        f.close()
+        f.close() # close the file
    
     def read_h5py_file(self, filename):
         """
@@ -137,19 +135,19 @@ class Device():
 
             # Get the data
             data = list(f[a_group_key])
-            # print(data)
+
 
     def run_once_images(self):
         """
-        acquires one set of images and saves them in separate circular buffes.
+        acquires one set of image data and apends them in separate circular buffers.
         """
-        img_dict = self.driver.get_images()
+        img_data_dict = self.driver.get_images()
         
+        self.buffers[DEPTH].append(img_data_dict[DEPTH].reshape((1,) + img_data_dict[DEPTH].shape))
+        self.buffers[COLOR].append(img_data_dict[COLOR].reshape((1,) + img_data_dict[COLOR].shape))
+        self.buffers[INFRARED].append(img_data_dict[INFRARED].reshape((1,) + img_data_dict[INFRARED].shape))
+        self.buffers[FRAMEN].append(img_data_dict[FRAMEN].reshape((1)))
 
-        self.buffers[DEPTH].append(img_dict[DEPTH].reshape((1,) + img_dict[DEPTH].shape))
-        self.buffers[COLOR].append(img_dict[COLOR].reshape((1,) + img_dict[COLOR].shape))
-        self.buffers[INFRARED].append(img_dict[INFRARED].reshape((1,) + img_dict[INFRARED].shape))
-            
     def run_once_gyroscope(self):
         """
         acquires one set of gyroscope reading and saves them in gyroscope related circular buffer.
@@ -233,6 +231,7 @@ if __name__ == "__main__":
     #from intel_realsense_devices.driver import Driver
     device = Device(config_filename = "config.yaml", h5py_filename = "test.h5py")
     device.init()
+    device.start()
     # device.show_live_plotting_test(dt = 1)
     device.collect_data(3)
 
