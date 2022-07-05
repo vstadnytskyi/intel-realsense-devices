@@ -2,7 +2,7 @@
 Driver
 ============
 
-* The driver class is configured to run for the realsense intell L515 and D435.
+* The driver class is configured to run for the realsense intel L515 and D435 cameras.
 
 The driver class provides ...
 

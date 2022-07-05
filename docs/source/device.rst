@@ -12,12 +12,12 @@ To intialize device
    device = Device(config_filename = "YOUR CONFIG YAML FILE", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
    device.init()
 
-
 Your config yaml file must contain a serial number
 
 .. code-block:: yaml
 
    serial_number: "YOUR SERIAL NUMBER"
+
 
 If you dont have a congfi yaml file, you can run it this way:
 
@@ -37,6 +37,5 @@ In order to test if gyroscope and accelerometer are configured run the following
 .. code-block:: python
    
    device.show_live_plotting_test(dt = 1)
-
 
 
