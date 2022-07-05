@@ -10,6 +10,7 @@ Intel Depth Camera D435i
 The driver 
 """
 
+from pickle import NONE
 from turtle import color
 import numpy as np 
 from time import time, ctime, sleep
@@ -34,21 +35,23 @@ class Device():
         """
 
         # Create a context object. This object owns the handles to all connected realsense devices  
+        self.config_dict = {}
         self.buffers = {}
         self.threads = {}
         self.run = True
         self.serial_number = ""
         self.read_config_file(config_filename)
         self.h5py_filename = h5py_filename
+        self.io_push_queue = None
+        self.io_put_queue = None
+        
 
 
     def init(self):
         """
         import intel real sense driver and initializes the device.
 
-        Circular buffers are:
-        - depth_image
-        - depth_image_timestamp
+        Circular buffers that contain data for each frame type
 
         """
         
@@ -224,14 +227,36 @@ class Device():
         self.save_h5py_file(self.h5py_filename) # saves the data into h5py file
         self.read_h5py_file(self.h5py_filename) # reads the data
 
+    def io_push(self, io_dict = None):
+        """
+        Add dictionary with key-value pairs every time you want a value to be pushed
+        to server for processing. 
+        """
+        
+        if self.io_push_queue is not None:
+            self.io_push_queue.put(io_dict)
 
+    def io_pull(self, io_dict):
+        """
+        Io_pull, takes dictionary as input where key is Process Variable name and value is 
+        new value. This is a path we use for server to submit updates back to the device level.
+        Again see simple DAQ example.       
+        Parameter: dict 
+        Returns: io_dict
+        """
+        while True:
+            io_dict.get(lock = True)
+            for key, value in io_dict.items():
+                if key == "laser intensity":
+                    self.driver.set_laser_intensity(value)
+                
 
 
 if __name__ == "__main__":
     from matplotlib import pyplot as plt
     plt.ion()
-    #from intel_realsense_devices.driver import Driver
-    device = Device(config_filename = "config.yaml", h5py_filename = "test.h5py")
+    #from intel_realsense_devices.driver import Driver 
+    device = Device(config_filename = r"intel_realsense_devices\test_files\config_template.conf", h5py_filename = r"intel_realsense_devices\test_files\test.h5py")
     device.init()
     device.start()
     # device.show_live_plotting_test(dt = 1)

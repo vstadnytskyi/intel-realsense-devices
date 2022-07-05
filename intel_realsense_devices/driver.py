@@ -63,7 +63,7 @@ class Driver():
     
     def SN_match(self, serial_number):
         """
-        returns flag if serial number matches
+        returns flag if serial number matches, configures and enables the device
         Parameter : serial number
         Returns: bool 
         """
