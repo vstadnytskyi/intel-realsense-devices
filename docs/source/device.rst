@@ -2,6 +2,7 @@
 Device
 ============
 
+You should be in the intel-realsense-devices directory.
 To intialize device
 
 .. code-block:: python
@@ -28,8 +29,8 @@ If you dont have a congfi yaml file, you can run it this way:
    device = Device(config_filename = "", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
    device.serial_number = "YOUR SERIAL NUMBER"
    device.init()
-
-The device class automaically inizlizes the driver class when init() is called that is why a serial number 
+ 
+The device class automaically inizlizes the driver class when init() is called, which is why a serial number 
 is needed.
 
 In order to test if gyroscope and accelerometer are configured run the following command:

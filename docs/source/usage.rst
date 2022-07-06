@@ -2,7 +2,7 @@
 Usage
 =====
 
-*The driver class is configured to run for the realsense intell L515 and D435.
+The driver class is configured to run for the realsense install L515 and D435.
 it may run with other modules but some functionality will give breakdown
 
 Start by importing intel realsense devices and inializing the device
