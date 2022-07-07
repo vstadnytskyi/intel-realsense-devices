@@ -12,7 +12,6 @@ The driver
 
 import numpy as np 
 from time import time, ctime, sleep
-
 import h5py
 
 DEPTH = "depth"
@@ -29,32 +28,6 @@ class Device():
     Higher level class that collects image data to store in a circular bufferip[]
     
     """
-    def init(self):
-        """
-        Import intel real sense driver and initializes the device.
-        Initialize Circular buffers that contain data for each frame type
-        """
-    
-        from intel_realsense_devices.driver import Driver
-        self.driver = Driver()
-        self.driver.init(self.serial_number)
-    
-        # if the config dict is empty
-        if self.config_dict == {}:
-            imgs_to_collect = 100
-        else:
-            imgs_to_collect = self.config_dict['imgs_to_collect'] # number of images to collect 
-
-        # intialialize the circular buffer
-        from circular_buffer_numpy.circular_buffer import CircularBuffer
-        self.buffers[DEPTH] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(DEPTH), dtype = self.driver.get_image_dtype(DEPTH)) 
-        self.buffers[COLOR] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(COLOR), dtype = self.driver.get_image_dtype(COLOR)) 
-        self.buffers[INFRARED] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
-        self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
-        self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
-        self.buffers[FRAMEN] = CircularBuffer(shape = (imgs_to_collect,), dtype = "int") 
-
-
     def __init__(self, config_filename, h5py_filename):
         """
         part 1 to iniatilie the camera
@@ -79,6 +52,30 @@ class Device():
         self.io_put_queue = None
         self.read_config_file(config_filename)
         
+    def init(self):
+        """
+        Import intel real sense driver and initializes the device.
+        Initialize Circular buffers that contain data for each frame type
+        """
+
+        from intel_realsense_devices.driver import Driver
+        self.driver = Driver()
+        self.driver.init(self.serial_number)
+
+        # if the config dict is empty
+        if "imgs_to_collect" not in self.config_dict.keys():
+            imgs_to_collect = 100
+        else:
+            imgs_to_collect = self.config_dict['imgs_to_collect'] # number of images to collect 
+
+        # intialialize the circular buffer
+        from circular_buffer_numpy.circular_buffer import CircularBuffer
+        self.buffers[DEPTH] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(DEPTH), dtype = self.driver.get_image_dtype(DEPTH)) 
+        self.buffers[COLOR] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(COLOR), dtype = self.driver.get_image_dtype(COLOR)) 
+        self.buffers[INFRARED] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
+        self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
+        self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
+        self.buffers[FRAMEN] = CircularBuffer(shape = (imgs_to_collect,), dtype = "int") 
 
     def read_config_file(self, config_filename):
         """

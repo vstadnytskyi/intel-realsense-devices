@@ -2,8 +2,10 @@
 Device
 ============
 
-You should be in the intel-realsense-devices directory.
-To intialize device
+Device is a higher level class that will contains funcanitly to collect data from the different piplines
+such as gyroscope and accelerometer. It runs multi-threads that continusly collect data. 
+
+To intialize device:
 
 .. code-block:: python
 
@@ -13,27 +15,9 @@ To intialize device
    device = Device(config_filename = "YOUR CONFIG YAML FILE", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
    device.init()
 
-Your config yaml file must contain a serial number
 
-.. code-block:: yaml
-
-   serial_number: "YOUR SERIAL NUMBER"
-
-
-If you dont have a congfi yaml file, you can run it this way:
-
-.. code-block:: python
-   
-   import intel_realsense_devices
-   from intel_realsense_devices.device import Device
-   device = Device(config_filename = "", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
-   device.serial_number = "YOUR SERIAL NUMBER"
-   device.init()
- 
-The device class automaically inizlizes the driver class when init() is called, which is why a serial number 
-is needed.
-
-In order to test if gyroscope and accelerometer are configured run the following command:
+To test if everything was setup correctly there is a function called show_live_plotting_test() that shows
+ a live plotting of the gyroscope and accelerometer from the camera to test if everything is setup corretly. 
 
 .. code-block:: python
    
