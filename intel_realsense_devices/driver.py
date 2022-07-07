@@ -10,15 +10,11 @@ Intel LiDAR L515
 Intel Depth Camera D435i
 """
 
-from tkinter import Image
-from tkinter.tix import IMAGE
-from typing_extensions import Self
+
 from matplotlib import image
 import numpy as np 
 import time
 import pyrealsense2 as rs
-from pdb import pm
-
 
 
 DEPTH = "depth"
@@ -26,7 +22,9 @@ COLOR = "color"
 INFRARED = "infrared"
 GYRO = "gyro"
 ACCEL = "accel"
-IMAGES = "images"
+IMAGE = "images"
+FRAMEN = "frameN"
+
 class Driver():
     """ 
     """
@@ -65,7 +63,7 @@ class Driver():
     
     def SN_match(self, serial_number):
         """
-        returns flag if serial number matches
+        returns flag if serial number matches, configures and enables the device
         Parameter : serial number
         Returns: bool 
         """
@@ -114,9 +112,9 @@ class Driver():
         """
         stops the pipelines
         """
-        self.profile[ACCEL] = self.pipeline[ACCEL].stop(self.conf[ACCEL])
-        self.profile[GYRO] = self.pipeline[GYRO].stop(self.conf[GYRO])
-        self.profile[IMAGE] = self.pipeline[IMAGE].stop(self.conf[IMAGE])
+        self.profile[ACCEL] = self.pipeline[ACCEL].stop()
+        self.profile[GYRO] = self.pipeline[GYRO].stop()
+        self.profile[IMAGE] = self.pipeline[IMAGE].stop()
         
     def find_devices(self):
         """
@@ -154,11 +152,13 @@ class Driver():
             
         except Exception as e:
             print('during IMU configuratuon the following error occured',e)
-        def hardware_reset(self):
-            """
-            resets hardware
-            """
-            dev = driver.profile["gyro"].get_device()
+    
+    def hardware_reset(self):
+        """
+        resets hardware
+        """
+        for frame in self.profile.keys():
+            dev = self.profile[frame].get_device()
             dev.hardware_reset()
 
     def get_data(self):
@@ -231,7 +231,9 @@ class Driver():
         """
 
         f = self.pipeline[IMAGE].wait_for_frames()
-
+        
+        #collect the frame for each frame type
+        frameN = f.get_frame_number()
         color = f.get_color_frame()
         infrared = f.get_infrared_frame()
         depth = f.get_depth_frame()
@@ -239,8 +241,9 @@ class Driver():
         color_img = np.asanyarray(color.get_data())
         ir_img = np.asanyarray(infrared.get_data())
         depth_img = np.asanyarray(depth.get_data())
+        FrameN_nparray = np.asanyarray(frameN)
 
-        return {"color": color_img, "depth" : depth_img, "infrared" : ir_img}
+        return {COLOR: color_img, DEPTH : depth_img, INFRARED : ir_img , FRAMEN : FrameN_nparray}
         
     def get_image_dtype(self, frame_type):
         """ 
@@ -278,7 +281,7 @@ class Driver():
             plt.subplot(133)
             plt.imshow(self.get_images()['infrared'])
             plt.title('Live infrared') 
-            time.sleep(1)
+            time.sleep(.00125)
 
 if __name__ == "__main__":
     from matplotlib import pyplot as plt

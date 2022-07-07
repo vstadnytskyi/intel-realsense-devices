@@ -10,10 +10,9 @@ Intel Depth Camera D435i
 The driver 
 """
 
-from turtle import color
 import numpy as np 
 from time import time, ctime, sleep
-import pyrealsense2 as rs
+
 import h5py
 
 DEPTH = "depth"
@@ -22,47 +21,65 @@ INFRARED = "infrared"
 GYRO = "gyro"
 ACCEL = "accel"
 IMAGE = "image"
+FRAMEN = "frameN"
 
 
 class Device():
     """ 
+    Higher level class that collects image data to store in a circular bufferip[]
+    
     """
+    def init(self):
+        """
+        Import intel real sense driver and initializes the device.
+        Initialize Circular buffers that contain data for each frame type
+        """
+    
+        from intel_realsense_devices.driver import Driver
+        self.driver = Driver()
+        self.driver.init(self.serial_number)
+    
+        # if the config dict is empty
+        if self.config_dict == {}:
+            imgs_to_collect = 100
+        else:
+            imgs_to_collect = self.config_dict['imgs_to_collect'] # number of images to collect 
+
+        # intialialize the circular buffer
+        from circular_buffer_numpy.circular_buffer import CircularBuffer
+        self.buffers[DEPTH] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(DEPTH), dtype = self.driver.get_image_dtype(DEPTH)) 
+        self.buffers[COLOR] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(COLOR), dtype = self.driver.get_image_dtype(COLOR)) 
+        self.buffers[INFRARED] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
+        self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
+        self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
+        self.buffers[FRAMEN] = CircularBuffer(shape = (imgs_to_collect,), dtype = "int") 
+
 
     def __init__(self, config_filename, h5py_filename):
         """
+        part 1 to iniatilie the camera
+
+        Parameters:
+        ------------
+        config_filename: string
+            config file path
+
+        h5py_filename: string
+            h5py file path
         """
 
         # Create a context object. This object owns the handles to all connected realsense devices  
+        self.config_dict = {}
         self.buffers = {}
         self.threads = {}
         self.run = True
         self.serial_number = ""
-        self.read_config_file(config_filename)
         self.h5py_filename = h5py_filename
-
-
-    def init(self):
-        """
-        import intel real sense driver and initializes the device.
-
-        Circular buffers are:
-        - depth_image
-        - depth_image_timestamp
-
-        """
-        from driver import Driver
-        self.driver = Driver()
-        self.driver.init(self.serial_number)
-    
-        # intialialize the circular buffer
-        from circular_buffer_numpy.circular_buffer import CircularBuffer
-        self.buffers[DEPTH] = CircularBuffer(shape = (100,)+ self.driver.get_image_shape(DEPTH), dtype = self.driver.get_image_dtype(DEPTH)) 
-        self.buffers[COLOR] = CircularBuffer(shape = (100,)+ self.driver.get_image_shape(COLOR), dtype = self.driver.get_image_dtype(COLOR)) 
-        self.buffers[INFRARED] = CircularBuffer(shape = (100,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
-        self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
-        self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
+        self.io_push_queue = None
+        self.io_put_queue = None
+        self.read_config_file(config_filename)
         
-        
+
     def read_config_file(self, config_filename):
         """
         reads configuration file and returns dictionary of parameters. The configuration file is created using YAML.
@@ -72,20 +89,14 @@ class Device():
         filename : string
             path to configuration file
 
-        Returns
-        -------
-        dictionary
-            dictionary with configuration parameters.
-
         """
         import yaml
-        dict = {}
+        
         if config_filename == "":
-            return dict 
+            return
         with open(config_filename) as f:
-            dict = yaml.safe_load(f)
-        self.serial_number = dict["serial_number"]
-        return dict
+            self.config_dict = yaml.safe_load(f)
+        self.serial_number = self.config_dict["serial_number"]
         
 
     def start(self):
@@ -103,32 +114,46 @@ class Device():
         orderly stop of device operation
         """
         self.run = False 
-        # self.driver.stop() #shuts down the piplines 
+        self.driver.stop() #shuts down the piplines 
 
 
     def save_h5py_file(self, filename):
         """
         saves the data from the buffers into h5py file
+        Parameters
+        ----------
+        filename : string 
+            path to H5py file
+        
         """
+        # grab all the data in the circular buffer
         gyro_data = self.buffers[GYRO].get_all()
         accel_data = self.buffers[ACCEL].get_all()
         depth_data = self.buffers[DEPTH].get_all()
         infrared_data = self.buffers[INFRARED].get_all()
         color_data = self.buffers[COLOR].get_all()
-        
+        frameN_data = self.buffers[FRAMEN].get_all()
 
+        # write data in the H5PY file
         with h5py.File(filename, 'w') as f:
-            dset = f.create_dataset("gyro", data = gyro_data)
-            dset = f.create_dataset("accel", data = accel_data)
-            dset = f.create_dataset("depth", data = depth_data)
-            dset = f.create_dataset("color", data = color_data)
-            dset = f.create_dataset("infrared", data = infrared_data)
+            dset = f.create_dataset(GYRO, data = gyro_data)
+            dset = f.create_dataset(ACCEL, data = accel_data)
+            dset = f.create_dataset(DEPTH, data = depth_data)
+            dset = f.create_dataset(COLOR, data = color_data)
+            dset = f.create_dataset(INFRARED, data = infrared_data)
+            dset = f.create_dataset(FRAMEN, data = infrared_data)
   
-        f.close()
+        f.close() # close the file
    
     def read_h5py_file(self, filename):
         """
         reads the hp5y file, For testing
+        
+        Parameters:
+        ----------
+        filename : string
+            file path
+
         """
         with h5py.File(filename, "r") as f:
             # List all groups
@@ -137,22 +162,22 @@ class Device():
 
             # Get the data
             data = list(f[a_group_key])
-            # print(data)
+
 
     def run_once_images(self):
         """
-        acquires one set of images and saves them in separate circular buffes.
+        Acquires one set of image data and apends them in separate circular buffers.
         """
-        img_dict = self.driver.get_images()
+        img_data_dict = self.driver.get_images()
         
+        self.buffers[DEPTH].append(img_data_dict[DEPTH].reshape((1,) + img_data_dict[DEPTH].shape))
+        self.buffers[COLOR].append(img_data_dict[COLOR].reshape((1,) + img_data_dict[COLOR].shape))
+        self.buffers[INFRARED].append(img_data_dict[INFRARED].reshape((1,) + img_data_dict[INFRARED].shape))
+        self.buffers[FRAMEN].append(img_data_dict[FRAMEN].reshape((1)))
 
-        self.buffers[DEPTH].append(img_dict[DEPTH].reshape((1,) + img_dict[DEPTH].shape))
-        self.buffers[COLOR].append(img_dict[COLOR].reshape((1,) + img_dict[COLOR].shape))
-        self.buffers[INFRARED].append(img_dict[INFRARED].reshape((1,) + img_dict[INFRARED].shape))
-            
     def run_once_gyroscope(self):
         """
-        acquires one set of gyroscope reading and saves them in gyroscope related circular buffer.
+        Acquires one set of gyroscope reading and saves them in gyroscope related circular buffer.
         """
 
         f = self.driver.pipeline[GYRO].wait_for_frames()
@@ -164,7 +189,7 @@ class Device():
 
     def run_once_accelerometer(self):
         """
-        acquires one set of gyroscope reading and saves them in gyroscope related circular buffer.
+        Acquires one set of gyroscope reading and saves them in gyroscope related circular buffer.
         """
 
         f = self.driver.pipeline[ACCEL].wait_for_frames()
@@ -188,7 +213,7 @@ class Device():
             
     def show_live_plotting_test(self, N = -1, dt = 1):
         """
-        shows live plotting of the gyro and accel data
+        Shows live plotting of the gyro and accel data for testing purposes
         """
         plt.ion()
         fig = plt.figure(figsize = (4,6))
@@ -215,6 +240,14 @@ class Device():
             plt.clf()
 
     def collect_data(self,time):
+        """
+        Higher order function to collect data
+        
+        Parameters
+        ----------
+        time : int
+            time to colllect data
+        """
         self.start() # starts the threads
        
         for i in range(time):
@@ -224,15 +257,46 @@ class Device():
         self.save_h5py_file(self.h5py_filename) # saves the data into h5py file
         self.read_h5py_file(self.h5py_filename) # reads the data
 
+    def io_push(self, io_dict = None):
+        """
+        Add dictionary with key-value pairs every time you want a value to be pushed
+        to server for processing. 
+        
+        Parameters: 
+        ------------
+        io_dict : dict
+            Where key is Process Variable name and value is new value 
+        """
+        
+        if self.io_push_queue is not None:
+            self.io_push_queue.put(io_dict)
 
+    def io_pull(self, io_dict):
+        """
+        Io_pull, takes dictionary as input where key is Process Variable name and value is 
+        new value. This is a path we use for server to submit updates back to the device level.
+        Again see simple DAQ example.       
+       
+        Parameters: 
+        ------------
+        io_dict : dict
+            Where key is Process Variable name and value is new value 
+        """
+        while True:
+            io_dict.get(lock = True)
+            for key, value in io_dict.items():
+                if key == "laser intensity":
+                    self.driver.set_laser_intensity(value)
+                
 
 
 if __name__ == "__main__":
     from matplotlib import pyplot as plt
     plt.ion()
-    #from intel_realsense_devices.driver import Driver
-    device = Device(config_filename = "config.yaml", h5py_filename = "test.h5py")
+    device = Device(config_filename = r"intel_realsense_devices\test_files\config_template.conf", h5py_filename = r"intel_realsense_devices\test_files\test.h5py")
     device.init()
+    device.start()
+
     # device.show_live_plotting_test(dt = 1)
     device.collect_data(3)
 

@@ -2,6 +2,9 @@
 Usage
 =====
 
+The driver class is configured to run for the realsense install L515 and D435.
+it may run with other modules but some functionality will give breakdown
+
 Start by importing intel realsense devices and inializing the device
 
 .. code-block:: python
@@ -11,9 +14,9 @@ Start by importing intel realsense devices and inializing the device
     device.init()
 
 
--------------------------
+****************
 Collecting Data
--------------------------
+****************
 
 All the functionality to collect data and store it in a file is already done for you.
 All you have to do is specify how many images you want to collect.
@@ -31,6 +34,7 @@ for.
 
 
 .. code-block:: yaml  
+
     imgs_to_collect = "NUMBER OF IMAGES TO COLLECT"
 
 After it collects the data it needs it then saves the data to a H5PY file where there is a data set 
