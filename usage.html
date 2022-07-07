@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; intel realsense devices 0.post55+g3e008a1 documentation</title>
+  <title>Usage &mdash; intel realsense devices 0.post79+g9214da8 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> intel realsense devices
           </a>
               <div class="version">
-                0.post55+g3e008a1
+                0.post79+g9214da8
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -49,7 +49,10 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="driver.html">Driver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="device.html">Device</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#collecting-data">Collecting Data</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
 </ul>
@@ -80,10 +83,32 @@
              
   <section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
-<p>Start by importing intel realsense devices.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">intel_realsense_devices</span>
+<p>The driver class is configured to run for the realsense install L515 and D435.
+it may run with other modules but some functionality will give breakdown</p>
+<p>Start by importing intel realsense devices and inializing the device</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">intel_realsense_devices.driver</span> <span class="kn">import</span> <span class="n">Device</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">Device</span><span class="p">(</span><span class="n">config_filename</span> <span class="o">=</span> <span class="s2">&quot;YOUR CONFIG YAML FILE&quot;</span><span class="p">,</span> <span class="n">h5py_filename</span> <span class="o">=</span> <span class="s2">&quot;YOUR H5PY/HDPY FILE NAME&quot;</span><span class="p">)</span>
+<span class="n">device</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 </pre></div>
 </div>
+<section id="collecting-data">
+<h2>Collecting Data<a class="headerlink" href="#collecting-data" title="Permalink to this heading">¶</a></h2>
+<p>All the functionality to collect data and store it in a file is already done for you.
+All you have to do is specify how many images you want to collect.
+Right now it works on time, it still needs to be updated.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">device</span><span class="o">.</span><span class="n">collect_data</span><span class="p">(</span><span class="n">time</span> <span class="o">=</span> <span class="s2">&quot;an integer&quot;</span><span class="p">)</span> <span class="c1"># still needs to be updated</span>
+</pre></div>
+</div>
+<p>In the config file there is a paremeter, imgs_to_collect, that contatins the number of images you want to collect
+from the camera. This will be used as the size for the ciruclar buffer. Since the gyroscope and
+accelerometer collect data at a higher frequency the size of the circular buffer will be accounted
+for.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">imgs_to_collect = &quot;NUMBER OF IMAGES TO COLLECT&quot;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>After it collects the data it needs it then saves the data to a H5PY file where there is a data set
+for [‘accel’, ‘color’, ‘depth’, ‘gyro’, ‘infrared’].</p>
+</section>
 </section>
 
 
