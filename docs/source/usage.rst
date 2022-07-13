@@ -5,7 +5,7 @@ Usage
 The driver class is configured to run for the realsense install L515 and D435.
 it may run with other modules but some functionality will give breakdown
 
-Please check config_template.conf to see how to structure your config file.
+Please see config_template.conf to see how to structure your config file.
 
 You should be in the intel-realsense-devices directory.
 
