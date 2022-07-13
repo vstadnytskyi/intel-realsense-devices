@@ -25,7 +25,7 @@ FRAMEN = "frameN"
 
 class Device():
     """ 
-    Higher level class that collects image data to store in a circular bufferip[]
+    Higher level class that collects different image data to store in a circular buffer
     
     """
     def __init__(self, config_filename, h5py_filename):
@@ -294,7 +294,7 @@ if __name__ == "__main__":
     device.init()
     device.start()
 
-    # device.show_live_plotting_test(dt = 1)
+    device.show_live_plotting_test(dt = 1)
     device.collect_data(3)
 
     # depth_image = device.buffers[DEPTH].get_last_value()

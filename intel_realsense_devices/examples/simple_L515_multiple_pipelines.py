@@ -2,7 +2,7 @@
 
 #NOTE, MAKE SURE TO CHANGE SERIAL NUMBER
 
-SERIAL_NUMBER = 'f1231322'
+SERIAL_NUMBER = '139522074713'
 
 import pyrealsense2 as rs
 import numpy as np
@@ -20,7 +20,7 @@ def initialize_camera():
         print('  Firmware version: ',  device.get_info(rs.camera_info.firmware_version))
         print('  USB: ',  device.get_info(rs.camera_info.usb_type_descriptor))
         serial=device.get_info(rs.camera_info.serial_number)
-        if serial == '139522074713':
+        if serial == 'SERIAL_NUMBER':
             dev = device
         else:
             print('device not found')
