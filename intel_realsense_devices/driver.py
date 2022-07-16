@@ -41,9 +41,10 @@ class Driver():
         """
         Method for Initalizing camera
         """
-
+        from logging import warn
         # check if SN matches 
-        if (self.SN_match(serial_number) == False):
+        if not self.SN_match(serial_number):
+            warn('camera with given serial number is not found')
             return
         else:
             # creates the piplines
@@ -67,12 +68,13 @@ class Driver():
         Parameter : serial number
         Returns: bool 
         """
+        from logging import warn, info
         ctx = rs.context()
         devices = ctx.query_devices()
         for device in devices:
             serial = device.get_info(rs.camera_info.serial_number)
             if serial == serial_number:
-                print('Device Found')
+                info('Device Found')
                
                 # setup the configuration for each frame type
                 self.conf[ACCEL] = rs.config()
@@ -84,7 +86,7 @@ class Driver():
                 self.conf[GYRO].enable_device(serial_number)
 
                 return True
-        print('Device not found')
+        warn('Device not found')
         return False
 
     def print_device_info(self):
@@ -93,12 +95,14 @@ class Driver():
         Parameter : Nothing
         Returns: Nothings
         """
-        print(' ----- Device ----- ')
-        print('  Device PID: ',  self.device.get_info(rs.camera_info.product_id))
-        print('  Device name: ',  self.device.get_info(rs.camera_info.name))
-        print('  Serial number: ',  self.device.get_info(rs.camera_info.serial_number))
-        print('  Firmware version: ',  self.device.get_info(rs.camera_info.firmware_version))
-        print('  USB: ',  self.device.get_info(rs.camera_info.usb_type_descriptor))
+        import pyrealsense2 as rs
+        from logging import info
+        info(' ----- Device ----- ')
+        info(f'  Device PID: {self.device.get_info(rs.camera_info.product_id)}')
+        info(f'  Device name:  {self.device.get_info(rs.camera_info.name)}')
+        info(f'  Serial number:  {self.device.get_info(rs.camera_info.serial_number)}')
+        info(f'  Firmware version:   {self.device.get_info(rs.camera_info.firmware_version)}')
+        info(f'  USB:  {self.device.get_info(rs.camera_info.usb_type_descriptor)}')
 
     def start(self):
         """
@@ -148,10 +152,10 @@ class Driver():
             self.conf[GYRO].enable_stream(rs.stream.gyro)#,rs.format.motion_xyz32f,200)
             self.conf[IMAGE].enable_stream(rs.stream.infrared)
             self.conf[IMAGE].enable_stream(rs.stream.depth)
-            print("Enabled all streams ")
+            info("Enabled all streams ")
             
         except Exception as e:
-            print('during IMU configuratuon the following error occured',e)
+            error('during IMU configuratuon the following error occured',e)
     
     def hardware_reset(self):
         """
@@ -284,14 +288,29 @@ class Driver():
             time.sleep(.00125)
 
 if __name__ == "__main__":
+    from tempfile import gettempdir
+    import logging
+    import os
+
+    logging.getLogger("blib2to3").setLevel(logging.ERROR)
+    logging.getLogger("parso").setLevel(logging.ERROR)
+    logging.getLogger("matplotlib").setLevel(logging.ERROR)
+    logging.getLogger("PIL").setLevel(logging.ERROR)
+    logging.getLogger("asyncio").setLevel(logging.ERROR)
+    
+    
+    
+
+    log_filename = os.path.join(gettempdir(),'intel_realsense_driver.log')
+    logging.basicConfig(filename=log_filename,
+                level=logging.DEBUG,
+                format="%(asctime)-15s|PID:%(process)-6s|%(levelname)-8s|%(name)s| module:%(module)s-%(funcName)s|message:%(message)s")
+
     from matplotlib import pyplot as plt
     #plt.ion()
     driver = Driver()
-    # driver.serial_number = 'f1320305'
-    # driver.serial_number = "139522074713"
-    driver.init("f1320305")
-    
-    plt.pause(.02)
-    plt.show()
-    driver.set_laser_intensity(10)
-    driver.live_stream_test()
+    # SN = 'f1320305'
+    # SN = "139522074713"
+    SN = "f1231322"
+    driver.init(SN)
+
