@@ -16,7 +16,7 @@ import pyrealsense2 as rs
 from matplotlib import pyplot as plt
 plt.ion()
 
-serial_numbers = ["f1231322"]
+serial_numbers = ["f1320305"]
 config = {}
 pipeline = {}
 pipeline_wrapper = {}
@@ -47,7 +47,7 @@ for serial_number in serial_numbers:
     pipeline[sn].start(config[sn])
 
 
-serial_number = 'f1231322' 
+serial_number = 'f1320305' 
 frames = pipeline[serial_number].wait_for_frames()
 depth_frame = frames.get_depth_frame()
 color_frame = frames.get_color_frame()
@@ -78,5 +78,5 @@ def save_to(color_image,depth_image, t,filename):
     from ubcs_auxiliary.save_load_object import save_to_file
     save_to_file(filename,{'color':color_image,'depth':depth_image,'time':t})
 
-filename = r'C:\Users\AR-VR lab W1\Documents\Valentyn\data\intel Lidar L515\scratch_lidar_images.txt'
+filename = r'intel_realsense_devices\test_files\t.txt'
 save_to(color_image,depth_image, t,filename)

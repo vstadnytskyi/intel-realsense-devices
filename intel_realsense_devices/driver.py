@@ -287,7 +287,9 @@ if __name__ == "__main__":
     from matplotlib import pyplot as plt
     #plt.ion()
     driver = Driver()
-    driver.init(serial_number = 'f1320305')
+    # driver.serial_number = 'f1320305'
+    # driver.serial_number = "139522074713"
+    driver.init("f1320305")
     
     plt.pause(.02)
     plt.show()

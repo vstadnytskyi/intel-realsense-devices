@@ -12,7 +12,6 @@ The driver
 
 import numpy as np 
 from time import time, ctime, sleep
-
 import h5py
 
 DEPTH = "depth"
@@ -26,35 +25,9 @@ FRAMEN = "frameN"
 
 class Device():
     """ 
-    Higher level class that collects image data to store in a circular bufferip[]
+    Higher level class that collects different image data to store in a circular buffer
     
     """
-    def init(self):
-        """
-        Import intel real sense driver and initializes the device.
-        Initialize Circular buffers that contain data for each frame type
-        """
-    
-        from intel_realsense_devices.driver import Driver
-        self.driver = Driver()
-        self.driver.init(self.serial_number)
-    
-        # if the config dict is empty
-        if self.config_dict == {}:
-            imgs_to_collect = 100
-        else:
-            imgs_to_collect = self.config_dict['imgs_to_collect'] # number of images to collect 
-
-        # intialialize the circular buffer
-        from circular_buffer_numpy.circular_buffer import CircularBuffer
-        self.buffers[DEPTH] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(DEPTH), dtype = self.driver.get_image_dtype(DEPTH)) 
-        self.buffers[COLOR] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(COLOR), dtype = self.driver.get_image_dtype(COLOR)) 
-        self.buffers[INFRARED] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
-        self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
-        self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
-        self.buffers[FRAMEN] = CircularBuffer(shape = (imgs_to_collect,), dtype = "int") 
-
-
     def __init__(self, config_filename, h5py_filename):
         """
         part 1 to iniatilie the camera
@@ -72,13 +45,37 @@ class Device():
         self.config_dict = {}
         self.buffers = {}
         self.threads = {}
-        self.run = True
+        self.run = False
         self.serial_number = ""
         self.h5py_filename = h5py_filename
         self.io_push_queue = None
         self.io_put_queue = None
         self.read_config_file(config_filename)
         
+    def init(self):
+        """
+        Import intel real sense driver and initializes the device.
+        Initialize Circular buffers that contain data for each frame type
+        """
+
+        from intel_realsense_devices.driver import Driver
+        self.driver = Driver()
+        self.driver.init(self.serial_number)
+
+        # if the config dict is empty
+        if "imgs_to_collect" not in self.config_dict.keys():
+            imgs_to_collect = 100
+        else:
+            imgs_to_collect = self.config_dict['imgs_to_collect'] # number of images to collect 
+
+        # intialialize the circular buffer
+        from circular_buffer_numpy.circular_buffer import CircularBuffer
+        self.buffers[DEPTH] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(DEPTH), dtype = self.driver.get_image_dtype(DEPTH)) 
+        self.buffers[COLOR] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(COLOR), dtype = self.driver.get_image_dtype(COLOR)) 
+        self.buffers[INFRARED] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
+        self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
+        self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
+        self.buffers[FRAMEN] = CircularBuffer(shape = (imgs_to_collect,), dtype = "int") 
 
     def read_config_file(self, config_filename):
         """
@@ -104,11 +101,11 @@ class Device():
         orderly start of device operation
         """
         from ubcs_auxiliary.multithreading import new_thread
-        
+        self.run = True
         self.threads[GYRO] = new_thread(self.run_get_gyro)
         self.threads[ACCEL] = new_thread(self.run_get_accel)
         self.threads[IMAGE] = new_thread(self.run_get_images)
-
+        
     def stop(self):
         """
         orderly stop of device operation
@@ -141,7 +138,7 @@ class Device():
             dset = f.create_dataset(DEPTH, data = depth_data)
             dset = f.create_dataset(COLOR, data = color_data)
             dset = f.create_dataset(INFRARED, data = infrared_data)
-            dset = f.create_dataset(FRAMEN, data = infrared_data)
+            dset = f.create_dataset(FRAMEN, data = frameN_data)
   
         f.close() # close the file
    
@@ -215,6 +212,7 @@ class Device():
         """
         Shows live plotting of the gyro and accel data for testing purposes
         """
+        self.start()
         plt.ion()
         fig = plt.figure(figsize = (4,6))
         while self.run:
@@ -238,7 +236,8 @@ class Device():
             plt.draw()
             sleep(dt)
             plt.clf()
-
+        self.stop()
+    
     def collect_data(self,time):
         """
         Higher order function to collect data
@@ -295,10 +294,10 @@ if __name__ == "__main__":
     plt.ion()
     device = Device(config_filename = r"intel_realsense_devices\test_files\config_template.conf", h5py_filename = r"intel_realsense_devices\test_files\test.h5py")
     device.init()
-    device.start()
+    # device.start()
 
-    # device.show_live_plotting_test(dt = 1)
-    device.collect_data(3)
+    device.show_live_plotting_test(dt = 1)
+    # device.collect_data(3)
 
     # depth_image = device.buffers[DEPTH].get_last_value()
     # print(device.buffers[DEPTH])
