@@ -308,8 +308,8 @@ if __name__ == "__main__":
                 format="%(asctime)-15s|PID:%(process)-6s|%(levelname)-8s|%(name)s| module:%(module)s-%(funcName)s|message:%(message)s")
 
 
-
-
+    import numpy as np
+    from matplotlib import pyplot as plt
     device = Device(config_filename = "", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
     SN = "f1231322"
     device.serial_number = SN
