@@ -152,7 +152,7 @@ class Driver():
             self.conf[ACCEL].enable_stream(rs.stream.accel,stream_index = 0,format = rs.format.motion_xyz32f, framerate = 250)
             self.conf[GYRO].enable_stream(rs.stream.accel,stream_index = 0,format = rs.format.motion_xyz32f, framerate = 400)
             self.conf[IMAGE].enable_stream(rs.stream.infrared)
-            self.conf[DEPTH].enable_stream(rs.stream.depth)
+            self.conf[IMAGE].enable_stream(rs.stream.depth)
             info("Enabled all streams ")
             
         except Exception as e:
