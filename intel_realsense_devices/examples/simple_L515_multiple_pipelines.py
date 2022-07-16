@@ -20,7 +20,7 @@ def initialize_camera():
         print('  Firmware version: ',  device.get_info(rs.camera_info.firmware_version))
         print('  USB: ',  device.get_info(rs.camera_info.usb_type_descriptor))
         serial=device.get_info(rs.camera_info.serial_number)
-        if serial == 'SERIAL_NUMBER':
+        if serial == SERIAL_NUMBER:
             dev = device
         else:
             print('device not found')
@@ -44,7 +44,6 @@ def initialize_camera():
     profile['accel'] = pipeline['accel'].start(conf['accel'])
     profile['gyro'] = pipeline['gyro'].start(conf['gyro'])
     
-
     print ('camera init complete')
     time.sleep(2)
     return pipeline, profile
@@ -66,6 +65,7 @@ try:
 finally:
     pass #p.stop()
 
+GLOBALC = 1
 def run_get_gyro_once(pipeline,profile):
     from time import time
     key = 'gyro'
@@ -74,6 +74,7 @@ def run_get_gyro_once(pipeline,profile):
     frameN = f[0].as_motion_frame().frame_number
     t = time()
     gyro_array = np.asanyarray((t,frameN,gyro.x,gyro.y,gyro.z)).reshape(1,5)
+    print(gyro_array)
     buffers['gyro'].append(gyro_array)
 
 def run_get_accel_once(pipeline,profile):
@@ -84,7 +85,6 @@ def run_get_accel_once(pipeline,profile):
     frameN = f[0].as_motion_frame().frame_number
     t = time()
     accel_array = np.asanyarray((t,frameN,accel.x,accel.y,accel.z)).reshape(1,5)
-
     buffers['accel'].append(accel_array)
 
 def run_get_gyro(pipeline,profile):
@@ -100,7 +100,7 @@ buffers = {}
 buffers['gyro'] = CircularBuffer((30000,5), dtype = 'float64')
 buffers['accel'] = CircularBuffer((30000,5), dtype = 'float64')
 
-from ubcs_auxiliary.threading import new_thread
+from ubcs_auxiliary.multithreading import new_thread
 threads = {}
 threads['gyro'] = new_thread(run_get_gyro,pipeline = pipeline,profile = profile)
 threads['accel'] = new_thread(run_get_accel,pipeline = pipeline,profile = profile)
