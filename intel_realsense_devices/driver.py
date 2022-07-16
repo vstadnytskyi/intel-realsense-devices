@@ -139,6 +139,7 @@ class Driver():
         """
         Enablles the stream for all configurations of the camera 
         """
+        from logging import error, warn, info, debug
         device_serial_number = str(self.device.get_info(rs.camera_info.serial_number))
         device_product_line = str(self.device.get_info(rs.camera_info.product_line))
         self.conf[IMAGE].enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
@@ -217,9 +218,9 @@ class Driver():
         Paramter: takes in laser power intensity
         Returns: nothing
         """
-
+        from logging import error,warn,info,debug
         if laser_power < 0 or laser_power > 100 :
-            print("Laser power must be between 0- 100")
+            warn("Laser power must be between 0- 100")
             return
 
         for frame_type in self.profile.keys():
@@ -233,7 +234,7 @@ class Driver():
         Parameters: Nothing
         Returns: Dict containing images  
         """
-
+        from logging import error,warn,info,debug
         f = self.pipeline[IMAGE].wait_for_frames()
         
         #collect the frame for each frame type

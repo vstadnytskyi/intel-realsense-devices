@@ -75,7 +75,7 @@ class Device():
         self.buffers[INFRARED] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
         self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
         self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
-        self.buffers[FRAMEN] = CircularBuffer(shape = (imgs_to_collect,), dtype = "int") 
+        self.buffers[FRAMEN] = CircularBuffer(shape = (imgs_to_collect,) + 3, dtype = "int") 
 
     def read_config_file(self, config_filename):
         """
@@ -170,7 +170,9 @@ class Device():
         self.buffers[DEPTH].append(img_data_dict[DEPTH].reshape((1,) + img_data_dict[DEPTH].shape))
         self.buffers[COLOR].append(img_data_dict[COLOR].reshape((1,) + img_data_dict[COLOR].shape))
         self.buffers[INFRARED].append(img_data_dict[INFRARED].reshape((1,) + img_data_dict[INFRARED].shape))
-        self.buffers[FRAMEN].append(img_data_dict[FRAMEN].reshape((1)))
+        t = time()
+        framen_array = np.asanyarray((t,img_data_dict[FRAMEN])).reshape(1,2)
+        self.buffers[FRAMEN].append(framen_array)
 
     def run_once_gyroscope(self):
         """
@@ -290,13 +292,31 @@ class Device():
 
 
 if __name__ == "__main__":
-    from matplotlib import pyplot as plt
-    plt.ion()
-    device = Device(config_filename = r"intel_realsense_devices\test_files\config_template.conf", h5py_filename = r"intel_realsense_devices\test_files\test.h5py")
+    import logging
+    logging.getLogger("blib2to3").setLevel(logging.ERROR)
+    logging.getLogger("parso").setLevel(logging.ERROR)
+    logging.getLogger("matplotlib").setLevel(logging.ERROR)
+    logging.getLogger("PIL").setLevel(logging.ERROR)
+    logging.getLogger("asyncio").setLevel(logging.ERROR)
+    
+    
+    from tempfile import gettempdir
+    import os
+    log_filename = os.path.join(gettempdir(),'intel_realsense_device.log')
+    logging.basicConfig(filename=log_filename,
+                level=logging.DEBUG,
+                format="%(asctime)-15s|PID:%(process)-6s|%(levelname)-8s|%(name)s| module:%(module)s-%(funcName)s|message:%(message)s")
+
+
+
+
+    device = Device(config_filename = "", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
+    SN = "f1231322"
+    device.serial_number = SN
     device.init()
     # device.start()
 
-    device.show_live_plotting_test(dt = 1)
+    # device.show_live_plotting_test(dt = 1)
     # device.collect_data(3)
 
     # depth_image = device.buffers[DEPTH].get_last_value()
