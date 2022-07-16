@@ -75,7 +75,7 @@ class Device():
         self.buffers[INFRARED] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
         self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
         self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
-        self.buffers[FRAMEN] = CircularBuffer(shape = (imgs_to_collect,) + 3, dtype = "int") 
+        self.buffers[FRAMEN] = CircularBuffer(shape = (imgs_to_collect,2) , dtype = "float64") 
 
     def read_config_file(self, config_filename):
         """
