@@ -32,3 +32,15 @@ In order to test if your device is connected and color image and depth piplines 
 .. code-block:: python
    
    driver.live_stream_test()
+
+Set laser intensity function:
+
+.. code-block:: python
+   
+   driver.set_laser_intensity(laser_power = 100)
+
+
+If the laser intensity is too strong, the reciver will saturate similairly to
+how a image can be overexposed. If it's too weak the system to
+get any information. Adjusting the laser power manually may give better results considering 
+the specific distance and objects for the use case. 

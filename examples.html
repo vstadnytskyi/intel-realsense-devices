@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; intel realsense devices 0.post94+g1951e97 documentation</title>
+  <title>Examples &mdash; intel realsense devices 0.post94+g1951e97 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -23,8 +23,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Driver" href="driver.html" />
-    <link rel="prev" title="intel realsense devices Documentation" href="index.html" /> 
+    <link rel="next" title="Release History" href="release-history.html" />
+    <link rel="prev" title="Usage" href="usage.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,11 +46,16 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="driver.html">Driver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="device.html">Device</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#simple-l515-py">simple_l515.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-l515-multiple-piplines-py">simple_l515_multiple_piplines.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simple-r435i-py">simple_R435i.py</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
 </ul>
@@ -69,9 +74,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Installation</li>
+      <li>Examples</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/examples.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -79,20 +84,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
-<p>At the command line:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install intel-realsense-devices
-</pre></div>
-</div>
+  <section id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h1>
+<p>The examples sub directory contains different scripts for running different types of cameras.
+Some cameras can be used in scripts that arent meant for it as thoses cameras ontain thoses basic
+functionality and more. The serial number is pre defined as a global variable.
+That will have to be changed in order run with your own camera.</p>
+<section id="simple-l515-py">
+<h2>simple_l515.py<a class="headerlink" href="#simple-l515-py" title="Permalink to this heading">¶</a></h2>
+<p>Runs a basic sets up a single pipline that collects color, depth, and infared data
+from the camera and creates a live stream of thoses 3 images.</p>
+</section>
+<section id="simple-l515-multiple-piplines-py">
+<h2>simple_l515_multiple_piplines.py<a class="headerlink" href="#simple-l515-multiple-piplines-py" title="Permalink to this heading">¶</a></h2>
+<p>Runs a script that sets up multiple piplines to collect data from the gyroscope and accelerometer.
+It then plot that data x, y, z data on to a figure.</p>
+</section>
+<section id="simple-r435i-py">
+<h2>simple_R435i.py<a class="headerlink" href="#simple-r435i-py" title="Permalink to this heading">¶</a></h2>
+<p>runs a script that caputers a depth and color image, then displays both onto a figure. In another figure it plots slices
+of depth image onto a xy plane. Lastly it saves the color/depth data into a txt file in the test_files sub-directory.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="intel realsense devices Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="driver.html" class="btn btn-neutral float-right" title="Driver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="release-history.html" class="btn btn-neutral float-right" title="Release History" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

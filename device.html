@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Device &mdash; intel realsense devices 0.post84+g5452b66 documentation</title>
+  <title>Device &mdash; intel realsense devices 0.post94+g1951e97 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> intel realsense devices
           </a>
               <div class="version">
-                0.post84+g5452b66
+                0.post94+g1951e97
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="driver.html">Driver</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Device</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
 </ul>
@@ -80,8 +81,9 @@
              
   <section id="device">
 <h1>Device<a class="headerlink" href="#device" title="Permalink to this heading">¶</a></h1>
-<p>You should be in the intel-realsense-devices directory.
-To intialize device</p>
+<p>Device is a higher level class that will contains funcanitly to collect data from the different piplines
+such as gyroscope and accelerometer. It runs multi-threads that continusly collect data.</p>
+<p>To intialize device:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">intel_realsense_devices</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;current version of the library is </span><span class="si">{</span><span class="n">intel_realsense_devices</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">intel_realsense_devices.device</span> <span class="kn">import</span> <span class="n">Device</span>
@@ -89,21 +91,10 @@ To intialize device</p>
 <span class="n">device</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Your config yaml file must contain a serial number</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;YOUR</span><span class="nv"> </span><span class="s">SERIAL</span><span class="nv"> </span><span class="s">NUMBER&quot;</span><span class="w"></span>
-</pre></div>
-</div>
-<p>If you dont have a congfi yaml file, you can run it this way:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">intel_realsense_devices</span>
-<span class="kn">from</span> <span class="nn">intel_realsense_devices.device</span> <span class="kn">import</span> <span class="n">Device</span>
-<span class="n">device</span> <span class="o">=</span> <span class="n">Device</span><span class="p">(</span><span class="n">config_filename</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">h5py_filename</span> <span class="o">=</span> <span class="s2">&quot;YOUR H5PY/HDPY FILE NAME&quot;</span><span class="p">)</span>
-<span class="n">device</span><span class="o">.</span><span class="n">serial_number</span> <span class="o">=</span> <span class="s2">&quot;YOUR SERIAL NUMBER&quot;</span>
-<span class="n">device</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>The device class automaically inizlizes the driver class when init() is called, which is why a serial number
-is needed.</p>
-<p>In order to test if gyroscope and accelerometer are configured run the following command:</p>
+<dl class="simple">
+<dt>To test if everything was setup correctly there is a function called show_live_plotting_test() that shows</dt><dd><p>a live plotting of the gyroscope and accelerometer from the camera to test if everything is setup corretly.</p>
+</dd>
+</dl>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">device</span><span class="o">.</span><span class="n">show_live_plotting_test</span><span class="p">(</span><span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
