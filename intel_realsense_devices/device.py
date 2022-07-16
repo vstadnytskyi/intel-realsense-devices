@@ -45,7 +45,7 @@ class Device():
         self.config_dict = {}
         self.buffers = {}
         self.threads = {}
-        self.run = True
+        self.run = False
         self.serial_number = ""
         self.h5py_filename = h5py_filename
         self.io_push_queue = None
@@ -101,11 +101,11 @@ class Device():
         orderly start of device operation
         """
         from ubcs_auxiliary.multithreading import new_thread
-        
+        self.run = True
         self.threads[GYRO] = new_thread(self.run_get_gyro)
         self.threads[ACCEL] = new_thread(self.run_get_accel)
         self.threads[IMAGE] = new_thread(self.run_get_images)
-
+        
     def stop(self):
         """
         orderly stop of device operation
@@ -138,7 +138,7 @@ class Device():
             dset = f.create_dataset(DEPTH, data = depth_data)
             dset = f.create_dataset(COLOR, data = color_data)
             dset = f.create_dataset(INFRARED, data = infrared_data)
-            dset = f.create_dataset(FRAMEN, data = infrared_data)
+            dset = f.create_dataset(FRAMEN, data = frameN_data)
   
         f.close() # close the file
    
@@ -212,6 +212,7 @@ class Device():
         """
         Shows live plotting of the gyro and accel data for testing purposes
         """
+        self.start()
         plt.ion()
         fig = plt.figure(figsize = (4,6))
         while self.run:
@@ -235,7 +236,8 @@ class Device():
             plt.draw()
             sleep(dt)
             plt.clf()
-
+        self.stop()
+    
     def collect_data(self,time):
         """
         Higher order function to collect data
@@ -292,10 +294,10 @@ if __name__ == "__main__":
     plt.ion()
     device = Device(config_filename = r"intel_realsense_devices\test_files\config_template.conf", h5py_filename = r"intel_realsense_devices\test_files\test.h5py")
     device.init()
-    device.start()
+    # device.start()
 
     device.show_live_plotting_test(dt = 1)
-    device.collect_data(3)
+    # device.collect_data(3)
 
     # depth_image = device.buffers[DEPTH].get_last_value()
     # print(device.buffers[DEPTH])
