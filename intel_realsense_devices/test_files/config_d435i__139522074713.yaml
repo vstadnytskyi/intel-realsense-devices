@@ -1,6 +1,6 @@
 name: 'augemented reality setup'
 model: 'Intel RealSense L515'
-serial_number: "f1320305"
+serial_number: "139522074713"
 imgs_to_collect: 16
 img_fps: 30
 gyro_fps: 400
