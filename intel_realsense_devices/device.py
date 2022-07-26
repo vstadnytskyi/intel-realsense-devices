@@ -11,7 +11,7 @@ The driver
 """
 
 import numpy as np 
-from time import time, ctime, sleep
+from time import time, sleep
 import h5py
 
 DEPTH = "depth"
@@ -21,6 +21,13 @@ GYRO = "gyro"
 ACCEL = "accel"
 IMAGE = "image"
 FRAMEN = "frameN"
+
+DEPTHCHANNEL = 0
+COLORCHANNEL = 1
+INFARAREDCHANNEL = 2
+ACCELCHANNEL = 3
+GYROCHANNEL = 4
+BUFFERLENGTH = "buffer_length"
 
 
 class Device():
@@ -60,22 +67,31 @@ class Device():
 
         from intel_realsense_devices.driver import Driver
         self.driver = Driver()
-        self.driver.init(self.serial_number)
+        self.driver.init(self.config_dict, serial_number = self.serial_number)
 
-        # if the config dict is empty
-        if "imgs_to_collect" not in self.config_dict.keys():
-            imgs_to_collect = 100
+        default_buffer_length = 10
+        # if channels are empty
+        if self.config_dict["channels"] == None:
+            channels = self.config_dict["channels"] = [
+                {'buffer_length': default_buffer_length},
+                {'buffer_length': default_buffer_length},
+                {'buffer_length': default_buffer_length},
+                {'buffer_length': default_buffer_length * 10000},
+                {'buffer_length': default_buffer_length * 10000}
+            ]
         else:
-            imgs_to_collect = self.config_dict['imgs_to_collect'] # number of images to collect 
-
+            channels = self.config_dict["channels"] # list of the channels
+       
+               
         # intialialize the circular buffer
         from circular_buffer_numpy.circular_buffer import CircularBuffer
-        self.buffers[DEPTH] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(DEPTH), dtype = self.driver.get_image_dtype(DEPTH)) 
-        self.buffers[COLOR] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(COLOR), dtype = self.driver.get_image_dtype(COLOR)) 
-        self.buffers[INFRARED] = CircularBuffer(shape = (imgs_to_collect,)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
-        self.buffers[GYRO] = CircularBuffer((30000,5), dtype = 'float64')
-        self.buffers[ACCEL] = CircularBuffer((30000,5), dtype = 'float64')
-        self.buffers[FRAMEN] = CircularBuffer(shape = (imgs_to_collect,2) , dtype = "float64") 
+        self.buffers[DEPTH] = CircularBuffer(shape = (channels[DEPTHCHANNEL][BUFFERLENGTH],)+ self.driver.get_image_shape(DEPTH), dtype = self.driver.get_image_dtype(DEPTH)) 
+        self.buffers[COLOR] = CircularBuffer(shape = (channels[COLORCHANNEL][BUFFERLENGTH],)+ self.driver.get_image_shape(COLOR), dtype = self.driver.get_image_dtype(COLOR)) 
+        self.buffers[INFRARED] = CircularBuffer(shape = (channels[INFARAREDCHANNEL][BUFFERLENGTH],)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
+        self.buffers[GYRO] = CircularBuffer((channels[GYROCHANNEL][BUFFERLENGTH],5), dtype = 'float64')
+        self.buffers[ACCEL] = CircularBuffer((channels[ACCELCHANNEL][BUFFERLENGTH],5), dtype = 'float64')
+        
+        self.buffers[FRAMEN] = CircularBuffer(shape = (channels[COLORCHANNEL][BUFFERLENGTH],), dtype = "int") 
 
     def read_config_file(self, config_filename):
         """
@@ -170,9 +186,7 @@ class Device():
         self.buffers[DEPTH].append(img_data_dict[DEPTH].reshape((1,) + img_data_dict[DEPTH].shape))
         self.buffers[COLOR].append(img_data_dict[COLOR].reshape((1,) + img_data_dict[COLOR].shape))
         self.buffers[INFRARED].append(img_data_dict[INFRARED].reshape((1,) + img_data_dict[INFRARED].shape))
-        t = time()
-        framen_array = np.asanyarray((t,img_data_dict[FRAMEN])).reshape(1,2)
-        self.buffers[FRAMEN].append(framen_array)
+        self.buffers[FRAMEN].append(img_data_dict[FRAMEN].reshape((1)))
 
     def run_once_gyroscope(self):
         """
@@ -214,6 +228,8 @@ class Device():
         """
         Shows live plotting of the gyro and accel data for testing purposes
         """
+        from matplotlib import pyplot as plt
+        
         self.start()
         plt.ion()
         fig = plt.figure(figsize = (4,6))
@@ -308,19 +324,17 @@ if __name__ == "__main__":
                 format="%(asctime)-15s|PID:%(process)-6s|%(levelname)-8s|%(name)s| module:%(module)s-%(funcName)s|message:%(message)s")
 
 
-    import numpy as np
-    from matplotlib import pyplot as plt
-    device = Device(config_filename = "", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
-    SN = "f1231322"
-    device.serial_number = SN
+    # device = Device(config_filename = "", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
+    # SN = "f1231322"
+    # device.serial_number = SN
+    # device.init()
+    # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
+    config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_L151_f1320305.yaml"
+    device = Device(config_filename = config_filename, h5py_filename = r"intel_realsense_devices\test_files\test.h5py")
     device.init()
-    # device.start()
-
-    # device.show_live_plotting_test(dt = 1)
     # device.collect_data(3)
 
-    # depth_image = device.buffers[DEPTH].get_last_value()
-    # print(device.buffers[DEPTH])
-    # plt.figure()
-    # plt.imshow(depth_image)
+    device.show_live_plotting_test(dt = 1)
+
+
 
