@@ -25,6 +25,13 @@ ACCEL = "accel"
 IMAGE = "images"
 FRAMEN = "frameN"
 
+DEPTHCHANNEL = 0
+COLORCHANNEL = 1
+INFARAREDCHANNEL = 2
+ACCELCHANNEL = 3
+GYROCHANNEL = 4
+FPS = "fps"
+
 class Driver():
     """ 
     """
@@ -35,9 +42,10 @@ class Driver():
         self.pipeline = {}
         self.profile = {}
         self.conf = {}
+        self.config_dict = {}
         # Create a context object. This object owns the handles to all connected realsense devices
 
-    def init(self,serial_number = ''):
+    def init(self,config_dict, serial_number = ''):
         """
         Method for Initalizing camera
         """
@@ -46,20 +54,20 @@ class Driver():
         if not self.SN_match(serial_number):
             warn('camera with given serial number is not found')
             return
-        else:
-            # creates the piplines
-            self.pipeline[ACCEL] = rs.pipeline()
-            self.pipeline[GYRO] = rs.pipeline()
-            self.pipeline[IMAGE] = rs.pipeline()
-        
-            # sets up the device 
-            self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline[IMAGE])
-            self.pipeline_profile = self.conf[IMAGE].resolve(self.pipeline_wrapper)
-            self.device = self.pipeline_profile.get_device()
+        self.config_dict = config_dict
+        # creates the piplines
+        self.pipeline[ACCEL] = rs.pipeline()
+        self.pipeline[GYRO] = rs.pipeline()
+        self.pipeline[IMAGE] = rs.pipeline()
+    
+        # sets up the device 
+        self.pipeline_wrapper = rs.pipeline_wrapper(self.pipeline[IMAGE])
+        self.pipeline_profile = self.conf[IMAGE].resolve(self.pipeline_wrapper)
+        self.device = self.pipeline_profile.get_device()
 
-            self.print_device_info() 
-            self.configure() # calls method to configure the device
-            self.start()
+        self.print_device_info() 
+        self.configure() # calls method to configure the device
+        self.start()
 
     
     def SN_match(self, serial_number):
@@ -144,19 +152,39 @@ class Driver():
         device_product_line = str(self.device.get_info(rs.camera_info.product_line))
         self.conf[IMAGE].enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 
+        gyro_fps = self.config_dict["channels"][GYROCHANNEL][FPS]
+        accel_fps = self.config_dict["channels"][ACCELCHANNEL][FPS]
+        
+
         if device_product_line == 'L500':
             self.conf[IMAGE].enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
         else:
             self.conf[IMAGE].enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        
         try:
-            self.conf[ACCEL].enable_stream(rs.stream.accel,stream_index = 0,format = rs.format.motion_xyz32f, framerate = 250)
-            self.conf[GYRO].enable_stream(rs.stream.accel,stream_index = 0,format = rs.format.motion_xyz32f, framerate = 400)
             self.conf[IMAGE].enable_stream(rs.stream.infrared)
             self.conf[IMAGE].enable_stream(rs.stream.depth)
-            info("Enabled all streams ")
+            info("Enabled color, infared and depth streams ")
             
         except Exception as e:
-            error('during IMU configuratuon the following error occured',e)
+            error('during image configuratuon the following error occured',e)
+
+        if self.config_dict != None:
+
+            try: 
+                self.conf[ACCEL].enable_stream(rs.stream.accel,stream_index = 0,format = rs.format.motion_xyz32f, framerate = accel_fps)
+                self.conf[GYRO].enable_stream(rs.stream.gyro,stream_index = 0,format = rs.format.motion_xyz32f, framerate = gyro_fps)
+
+            except Exception as e:
+                error('during IMU configuratuon the following error occured',e)
+
+        else:
+            try: 
+                self.conf[ACCEL].enable_stream(rs.stream.accel)
+                self.conf[GYRO].enable_stream(rs.stream.gyro)
+
+            except Exception as e:
+                error('during DEFAULT IMU configuratuon the following error occured',e)
     
     def hardware_reset(self):
         """
@@ -187,7 +215,6 @@ class Driver():
         color_image = np.copy(np.asanyarray(color_frame.get_data()))
         return {'depth':depth_image,'color': color_image,'imu1':imu1,'imu2':imu2,'frame#':frameN}
         
-
     def get_depth_resolution(self):
         """
         returns depth resolution of the camera in meters per count
@@ -292,14 +319,13 @@ if __name__ == "__main__":
     from tempfile import gettempdir
     import logging
     import os
+    import yaml
 
     logging.getLogger("blib2to3").setLevel(logging.ERROR)
     logging.getLogger("parso").setLevel(logging.ERROR)
     logging.getLogger("matplotlib").setLevel(logging.ERROR)
     logging.getLogger("PIL").setLevel(logging.ERROR)
     logging.getLogger("asyncio").setLevel(logging.ERROR)
-    
-    
     
 
     log_filename = os.path.join(gettempdir(),'intel_realsense_driver.log')
@@ -310,8 +336,12 @@ if __name__ == "__main__":
     from matplotlib import pyplot as plt
     #plt.ion()
     driver = Driver()
-    # SN = 'f1320305'
     # SN = "139522074713"
-    SN = "f1231322"
-    driver.init(SN)
-
+    # SN = "f1231322"
+    config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
+    # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_L151_f1320305.yaml"
+    with open(config_filename) as f:
+        config_dict = yaml.safe_load(f)
+        SN = config_dict["serial_number"]
+        driver.init(config_dict , serial_number= SN)
+        driver.live_stream_test()

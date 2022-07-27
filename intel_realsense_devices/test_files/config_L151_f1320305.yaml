@@ -26,7 +26,7 @@ channels:
 
   - 
     type: accel
-    fps: 250
+    fps: 200
     buffer_length: 30000
 
   - 
