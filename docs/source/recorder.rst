@@ -2,9 +2,9 @@
 Recorder
 ============
 
-This file is a script that takes in two filenames names, a config and h5py file.
+This file is a script that takes in two filenames names as arguments, a config and h5py file.
 
-To intialize The recorder:
+To intialize the recorder:
 
 .. code-block:: python
 
@@ -17,9 +17,11 @@ To intialize The recorder:
 To show a live stream of depth, infarared, and color run the following command:
 
 .. code-block:: python
+
    record.live_stream_test()
 
 To show live plot of the gyro and accelerometer run the following command:
 
 .. code-block:: python
+
     record.show_live_plotting(dt = 1)
