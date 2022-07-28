@@ -227,14 +227,28 @@ class Device():
 
 
 if __name__ == "__main__":
+    """
+    For testing
+    """
     import logging
+    from logging import debug, info, warning, error
     logging.getLogger("blib2to3").setLevel(logging.ERROR)
     logging.getLogger("parso").setLevel(logging.ERROR)
     logging.getLogger("matplotlib").setLevel(logging.ERROR)
     logging.getLogger("PIL").setLevel(logging.ERROR)
     logging.getLogger("asyncio").setLevel(logging.ERROR)
     
-    
+    import sys
+
+    if len(sys.argv) > 1:
+        debug('reading specified config file')
+        config_filename = sys.argv[1]
+        info(config_filename)
+    else:
+        debug('reading default config file')
+        config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
+        info(config_filename)
+
     from tempfile import gettempdir
     import os
     log_filename = os.path.join(gettempdir(),'intel_realsense_device.log')
@@ -242,16 +256,9 @@ if __name__ == "__main__":
                 level=logging.DEBUG,
                 format="%(asctime)-15s|PID:%(process)-6s|%(levelname)-8s|%(name)s| module:%(module)s-%(funcName)s|message:%(message)s")
 
-
-    # device = Device(config_filename = "", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
-    # SN = "f1231322"
-    # device.serial_number = SN
-    # device.init()
-    # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
-    config_filename = r"test_files\config_L151_f1320305.yaml"
     device = Device(config_filename = config_filename)
     device.init()
-    device.driver.live_stream_test()
+    device.show_live_plotting_test(dt = 1)
 
 
 
