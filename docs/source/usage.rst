@@ -53,7 +53,8 @@ In order run it all you need is a config file and a h5py file to save data into.
 
 To collect the data run the following script.
 
-.. code-block:: python        
+.. code-block:: python     
+      
       # IT MUST BE IN THIS ORDER  
       python recorder.py "YOUR CONFIG FILE" "YOUR H5PY FILE"
       # my example
