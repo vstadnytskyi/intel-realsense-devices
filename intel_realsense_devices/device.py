@@ -174,24 +174,6 @@ class Device():
         while self.run:
             self.run_once_images()
             
-  
-    def collect_data(self,time):
-        """
-        Higher order function to collect data
-        
-        Parameters
-        ----------
-        time : int
-            time to colllect data
-        """
-        self.start() # starts the threads
-       
-        for i in range(time):
-            sleep(.025)
-        self.stop() # orderely stops the piplines
-        
-        self.save_h5py_file(self.h5py_filename) # saves the data into h5py file
-        self.read_h5py_file(self.h5py_filename) # reads the data
 
     def io_push(self, io_dict = None):
         """
@@ -258,7 +240,6 @@ if __name__ == "__main__":
 
     device = Device(config_filename = config_filename)
     device.init()
-    device.show_live_plotting_test(dt = 1)
 
 
 
