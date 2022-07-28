@@ -2,10 +2,8 @@
 Usage
 =====
 
-The driver class is configured to run for the realsense install L515 and D435.
-it may run with other modules but some functionality will give breakdown
-
-Please see config_template.conf to see how to structure your config file.
+The driver class is configured to run for the realsense install L515 and D435i.
+it may run with other modules but some functionality will breakdown
 
 You should be in the intel-realsense-devices directory.
 
@@ -16,42 +14,50 @@ To intialize device:
    import intel_realsense_devices
    print(f'current version of the library is {intel_realsense_devices.__version__}')
    from intel_realsense_devices.device import Device
-   device = Device(config_filename = "YOUR CONFIG YAML FILE", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
+   device = Device(config_filename = "YOUR CONFIG YAML FILE")
    device.init()
 
-Your config yaml file must contain a serial number and imgs_to_collect in order to prepare early. This contatins the number of images 
-you want to collect from the camera. This will be used as the size for the ciruclar buffer. Since the 
-gyroscope and accelerometer collect data at a higher frequency the size of the circular buffer will need be
-accounted for.
+Your config yaml file must contain a serial number and channels paramter in order to avoid 
+using the defualt values. In the channels paremter there should be a dict for each frame type. 
+This contains the buffer_length. This will be used as the size for the ciruclar buffer. 
+
+Since the gyroscope and accelerometer collect data at a higher frequency the size of the
+circular buffer will need be accounted for.
+
+Please see config_template.conf for a more more descriptive structure.
 
 .. code-block:: yaml
 
    serial_number: "YOUR SERIAL NUMBER"
-   imgs_to_collect: "NUMBER OF IMAGES TO COLLECT"
+   channels:
+      - #<-this is first entry in the channels list
+         type: depth # frame type
+         fps: 30 
+         buffer_length: 30
 
 
-If you dont have a congfi yaml file, you can run it by setting the serial number later on (see below). If there is no config file given
-images_to_collect will be set to 100 by default. In order to avoid that ou should create a config file.
+For the D435i camera:
+Acceleation Output Data Rate 62.5Hz/250Hz
+Gyro Output Data Rate at 200Hz/400Hz
 
-.. code-block:: python
-   
-   import intel_realsense_devices
-   from intel_realsense_devices.device import Device
-   device = Device(config_filename = "", h5py_filename = "YOUR H5PY/HDPY FILE NAME")
-   device.serial_number = "YOUR SERIAL NUMBER"
-   device.init()
+For the L515 camera:
+Accelerometer Output Data Rate 100Hz/200Hz/400Hz
+Gyroscope Output Data Rate 100Hz/200Hz/400Hz
 
 ****************
 Collecting Data
 ****************
 
-All the functionality to collect data and store it in a file is already done for you.
-All you have to do is specify how many images you want to collect.
-Right now it works on time, it still needs to be updated.
+All the functionality to collect data and store it in a file is already done for you in the record script.
+In order run it all you need is a config file and a h5py file to save data into.
 
-.. code-block:: python          
-    
-    device.collect_data(time = "an integer") # still needs to be updated
+To collect the data run the following script.
 
-After it collects the data it needs it then saves the data to a H5PY file where there is a data set 
-for ['accel', 'color', 'depth', 'gyro', 'infrared'].
+.. code-block:: python        
+      # IT MUST BE IN THIS ORDER  
+      python recorder.py "YOUR CONFIG FILE" "YOUR H5PY FILE"
+      # my example
+      python recorder.py "test_files\config_L151_f1320305.yaml" "test_files\test.h5py"
+
+
+The data will be stored into a H5PY file where the data set names are ['accel', 'color', 'depth', 'frameN', 'gyro', 'infrared'].
