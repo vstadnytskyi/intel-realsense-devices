@@ -12,7 +12,6 @@ The driver
 
 import numpy as np 
 from time import time, sleep
-import h5py
 
 DEPTH = "depth"
 COLOR = "color"
@@ -35,7 +34,7 @@ class Device():
     Higher level class that collects different image data to store in a circular buffer
     
     """
-    def __init__(self, config_filename, h5py_filename):
+    def __init__(self, config_filename):
         """
         part 1 to iniatilie the camera
 
@@ -52,9 +51,8 @@ class Device():
         self.config_dict = {}
         self.buffers = {}
         self.threads = {}
-        self.run = False
         self.serial_number = ""
-        self.h5py_filename = h5py_filename
+        self.run = False
         self.io_push_queue = None
         self.io_put_queue = None
         self.read_config_file(config_filename)
@@ -90,7 +88,6 @@ class Device():
         self.buffers[INFRARED] = CircularBuffer(shape = (channels[INFARAREDCHANNEL][BUFFERLENGTH],)+ self.driver.get_image_shape(INFRARED), dtype = self.driver.get_image_dtype(INFRARED)) 
         self.buffers[GYRO] = CircularBuffer((channels[GYROCHANNEL][BUFFERLENGTH],5), dtype = 'float64')
         self.buffers[ACCEL] = CircularBuffer((channels[ACCELCHANNEL][BUFFERLENGTH],5), dtype = 'float64')
-        
         self.buffers[FRAMEN] = CircularBuffer(shape = (channels[COLORCHANNEL][BUFFERLENGTH],), dtype = "int") 
 
     def read_config_file(self, config_filename):
@@ -128,53 +125,6 @@ class Device():
         """
         self.run = False 
         self.driver.stop() #shuts down the piplines 
-
-
-    def save_h5py_file(self, filename):
-        """
-        saves the data from the buffers into h5py file
-        Parameters
-        ----------
-        filename : string 
-            path to H5py file
-        
-        """
-        # grab all the data in the circular buffer
-        gyro_data = self.buffers[GYRO].get_all()
-        accel_data = self.buffers[ACCEL].get_all()
-        depth_data = self.buffers[DEPTH].get_all()
-        infrared_data = self.buffers[INFRARED].get_all()
-        color_data = self.buffers[COLOR].get_all()
-        frameN_data = self.buffers[FRAMEN].get_all()
-
-        # write data in the H5PY file
-        with h5py.File(filename, 'w') as f:
-            dset = f.create_dataset(GYRO, data = gyro_data)
-            dset = f.create_dataset(ACCEL, data = accel_data)
-            dset = f.create_dataset(DEPTH, data = depth_data)
-            dset = f.create_dataset(COLOR, data = color_data)
-            dset = f.create_dataset(INFRARED, data = infrared_data)
-            dset = f.create_dataset(FRAMEN, data = frameN_data)
-  
-        f.close() # close the file
-   
-    def read_h5py_file(self, filename):
-        """
-        reads the hp5y file, For testing
-        
-        Parameters:
-        ----------
-        filename : string
-            file path
-
-        """
-        with h5py.File(filename, "r") as f:
-            # List all groups
-            print("Keys: %s" % f.keys())
-            a_group_key = list(f.keys())[0]
-
-            # Get the data
-            data = list(f[a_group_key])
 
 
     def run_once_images(self):
@@ -224,38 +174,7 @@ class Device():
         while self.run:
             self.run_once_images()
             
-    def show_live_plotting_test(self, N = -1, dt = 1):
-        """
-        Shows live plotting of the gyro and accel data for testing purposes
-        """
-        from matplotlib import pyplot as plt
-        
-        self.start()
-        plt.ion()
-        fig = plt.figure(figsize = (4,6))
-        while self.run:
-            gyro_data = self.buffers[GYRO].get_all()
-            accel_data = self.buffers[ACCEL].get_all()
-            for i in range(3):
-                plt.subplot(611 + i)
-                plt.plot(gyro_data[:,0]-gyro_data[-1,0],gyro_data[:,i+2])
-                plt.xlim([-10,0])
-                axes = 'xyz'
-                plt.title(f'gyro: axis = {axes[i]}')
-
-            for i in range(3):
-                plt.subplot(614 + i)
-                plt.plot(accel_data[:,0]-accel_data[-1,0],accel_data[:,i+2])
-                plt.xlim([-10,0])
-                axes = 'xyz'
-                plt.title(f'accel: axis = {axes[i]}')
-            fig.tight_layout()
-            plt.pause(0.001)
-            plt.draw()
-            sleep(dt)
-            plt.clf()
-        self.stop()
-    
+  
     def collect_data(self,time):
         """
         Higher order function to collect data
@@ -329,12 +248,10 @@ if __name__ == "__main__":
     # device.serial_number = SN
     # device.init()
     # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
-    config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_L151_f1320305.yaml"
-    device = Device(config_filename = config_filename, h5py_filename = r"intel_realsense_devices\test_files\test.h5py")
+    config_filename = r"test_files\config_L151_f1320305.yaml"
+    device = Device(config_filename = config_filename)
     device.init()
-    # device.collect_data(3)
-
-    device.show_live_plotting_test(dt = 1)
+    device.driver.live_stream_test()
 
 
 
