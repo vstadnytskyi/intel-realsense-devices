@@ -55,6 +55,7 @@ class Driver():
             warn('camera with given serial number is not found')
             return
         self.config_dict = config_dict
+        
         # creates the piplines
         self.pipeline[ACCEL] = rs.pipeline()
         self.pipeline[GYRO] = rs.pipeline()
@@ -274,7 +275,7 @@ class Driver():
         ir_img = np.asanyarray(infrared.get_data())
         depth_img = np.asanyarray(depth.get_data())
         FrameN_nparray = np.asanyarray(frameN)
-
+        
         return {COLOR: color_img, DEPTH : depth_img, INFRARED : ir_img , FRAMEN : FrameN_nparray}
         
     def get_image_dtype(self, frame_type):
@@ -293,29 +294,6 @@ class Driver():
         """
         return self.get_images()[frame_type].shape
     
-    def live_stream_test(self):
-        """
-        Test that plays a live stream of depth color and infared for about 10 seconds
-        """
-        from matplotlib import pyplot as plt
-        plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
-
-        for i in range(10):
-            plt.pause(.0001)
-            plt.subplot(131)
-            plt.imshow(self.get_images()['depth'])
-
-            plt.title('Live depth')
-
-            plt.subplot(132)
-            plt.imshow(self.get_images()['color'])
-            plt.title('Live color')
-
-            plt.subplot(133)
-            plt.imshow(self.get_images()['infrared'])
-            plt.title('Live infrared') 
-            time.sleep(.00125)
-
 if __name__ == "__main__":
     from tempfile import gettempdir
     import logging
@@ -339,10 +317,10 @@ if __name__ == "__main__":
     driver = Driver()
     # SN = "139522074713"
     # SN = "f1231322"
-    config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
-    # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_L151_f1320305.yaml"
+    # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
+    config_filename = "test_files\config_L151_f1320305.yaml"
     with open(config_filename) as f:
         config_dict = yaml.safe_load(f)
         SN = config_dict["serial_number"]
         driver.init(config_dict , serial_number= SN)
-        driver.live_stream_test()
+
