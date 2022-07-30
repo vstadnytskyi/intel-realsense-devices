@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; intel realsense devices 0.post105+g6e2b40b documentation</title>
+  <title>Usage &mdash; intel realsense devices 0.post116+gbc7d2ae documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> intel realsense devices
           </a>
               <div class="version">
-                0.post105+g6e2b40b
+                0.post116+gbc7d2ae
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -54,6 +54,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recorder.html">Recorder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
 </ul>
@@ -84,45 +85,49 @@
              
   <section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
-<p>The driver class is configured to run for the realsense install L515 and D435.
-it may run with other modules but some functionality will give breakdown</p>
-<p>Please see config_template.conf to see how to structure your config file.</p>
+<p>The driver class is configured to run for the realsense install L515 and D435i.
+it may run with other modules but some functionality will breakdown</p>
 <p>You should be in the intel-realsense-devices directory.</p>
 <p>To intialize device:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">intel_realsense_devices</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;current version of the library is </span><span class="si">{</span><span class="n">intel_realsense_devices</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">intel_realsense_devices.device</span> <span class="kn">import</span> <span class="n">Device</span>
-<span class="n">device</span> <span class="o">=</span> <span class="n">Device</span><span class="p">(</span><span class="n">config_filename</span> <span class="o">=</span> <span class="s2">&quot;YOUR CONFIG YAML FILE&quot;</span><span class="p">,</span> <span class="n">h5py_filename</span> <span class="o">=</span> <span class="s2">&quot;YOUR H5PY/HDPY FILE NAME&quot;</span><span class="p">)</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">Device</span><span class="p">(</span><span class="n">config_filename</span> <span class="o">=</span> <span class="s2">&quot;YOUR CONFIG YAML FILE&quot;</span><span class="p">)</span>
 <span class="n">device</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Your config yaml file must contain a serial number and imgs_to_collect in order to prepare early. This contatins the number of images
-you want to collect from the camera. This will be used as the size for the ciruclar buffer. Since the
-gyroscope and accelerometer collect data at a higher frequency the size of the circular buffer will need be
-accounted for.</p>
+<p>Your config yaml file must contain a serial number and channels paramter in order to avoid
+using the defualt values. In the channels paremter there should be a dict for each frame type.
+This contains the buffer_length. This will be used as the size for the ciruclar buffer.</p>
+<p>Since the gyroscope and accelerometer collect data at a higher frequency the size of the
+circular buffer will need be accounted for.</p>
+<p>Please see config_template.conf for a more more descriptive structure.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;YOUR</span><span class="nv"> </span><span class="s">SERIAL</span><span class="nv"> </span><span class="s">NUMBER&quot;</span><span class="w"></span>
-<span class="nt">imgs_to_collect</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NUMBER</span><span class="nv"> </span><span class="s">OF</span><span class="nv"> </span><span class="s">IMAGES</span><span class="nv"> </span><span class="s">TO</span><span class="nv"> </span><span class="s">COLLECT&quot;</span><span class="w"></span>
+<span class="nt">channels</span><span class="p">:</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="c1">#&lt;-this is first entry in the channels list</span><span class="w"></span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">depth</span><span class="w"> </span><span class="c1"># frame type</span><span class="w"></span>
+<span class="w">      </span><span class="nt">fps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
+<span class="w">      </span><span class="nt">buffer_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
 </pre></div>
 </div>
-<p>If you dont have a congfi yaml file, you can run it by setting the serial number later on (see below). If there is no config file given
-images_to_collect will be set to 100 by default. In order to avoid that ou should create a config file.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">intel_realsense_devices</span>
-<span class="kn">from</span> <span class="nn">intel_realsense_devices.device</span> <span class="kn">import</span> <span class="n">Device</span>
-<span class="n">device</span> <span class="o">=</span> <span class="n">Device</span><span class="p">(</span><span class="n">config_filename</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">h5py_filename</span> <span class="o">=</span> <span class="s2">&quot;YOUR H5PY/HDPY FILE NAME&quot;</span><span class="p">)</span>
-<span class="n">device</span><span class="o">.</span><span class="n">serial_number</span> <span class="o">=</span> <span class="s2">&quot;YOUR SERIAL NUMBER&quot;</span>
-<span class="n">device</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
-</pre></div>
-</div>
+<p>For the D435i camera:
+Acceleation Output Data Rate 62.5Hz/250Hz
+Gyro Output Data Rate at 200Hz/400Hz</p>
+<p>For the L515 camera:
+Accelerometer Output Data Rate 100Hz/200Hz/400Hz
+Gyroscope Output Data Rate 100Hz/200Hz/400Hz</p>
 <section id="collecting-data">
 <h2>Collecting Data<a class="headerlink" href="#collecting-data" title="Permalink to this heading">¶</a></h2>
-<p>All the functionality to collect data and store it in a file is already done for you.
-All you have to do is specify how many images you want to collect.
-Right now it works on time, it still needs to be updated.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">device</span><span class="o">.</span><span class="n">collect_data</span><span class="p">(</span><span class="n">time</span> <span class="o">=</span> <span class="s2">&quot;an integer&quot;</span><span class="p">)</span> <span class="c1"># still needs to be updated</span>
+<p>All the functionality to collect data and store it in a file is already done for you in the record script.
+In order run it all you need is a config file and a h5py file to save data into.</p>
+<p>To collect the data run the following script.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># IT MUST BE IN THIS ORDER</span>
+<span class="n">python</span> <span class="n">recorder</span><span class="o">.</span><span class="n">py</span> <span class="s2">&quot;YOUR CONFIG FILE&quot;</span> <span class="s2">&quot;YOUR H5PY FILE&quot;</span>
+<span class="c1"># my example</span>
+<span class="n">python</span> <span class="n">recorder</span><span class="o">.</span><span class="n">py</span> <span class="s2">&quot;test_files\config_L151_f1320305.yaml&quot;</span> <span class="s2">&quot;test_files</span><span class="se">\t</span><span class="s2">est.h5py&quot;</span>
 </pre></div>
 </div>
-<p>After it collects the data it needs it then saves the data to a H5PY file where there is a data set
-for [‘accel’, ‘color’, ‘depth’, ‘gyro’, ‘infrared’].</p>
+<p>The data will be stored into a H5PY file where the data set names are [‘accel’, ‘color’, ‘depth’, ‘frameN’, ‘gyro’, ‘infrared’].</p>
 </section>
 </section>
 
