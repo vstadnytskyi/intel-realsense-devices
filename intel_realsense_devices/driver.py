@@ -297,6 +297,7 @@ class Driver():
         """
         Test that plays a live stream of depth color and infared for about 10 seconds
         """
+        from matplotlib import pyplot as plt
         plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
 
         for i in range(10):
