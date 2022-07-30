@@ -26,13 +26,14 @@ class Recorder():
         h5py_filename: string
             h5py file path
         """
-        from device import Device
-        self.device = Device(config_filename = config_filename)
+        from intel_realsense_devices.device import Device
+        self.device = Device(config_filename)
+        # self.driver = self.device.driver
         self.device.init()
-        self.driver = self.device.driver
+
         self.h5py_filename = h5py_filename
-        
-    def record(self,time):
+
+    def record(self):
         """
         Higher order function to collect data
         
@@ -41,11 +42,15 @@ class Recorder():
         time : int
             time to colllect data
         """
+
         self.device.start() # starts the threads
-       
-        for i in range(time):
-            sleep(.025)
-        self.device.stop() # orderely stops the piplines
+        last_frame = 0
+        buffer_length = self.device.buffers[FRAMEN].get_all().shape[0]
+
+        while last_frame < buffer_length:
+            last_frame = self.device.buffers[FRAMEN].get_last_value()[0]
+        
+        self.device.stop() # shuts down the threads and piplines
         
         self.save_h5py_file(self.h5py_filename) # saves the data into h5py file
         self.read_h5py_file(self.h5py_filename) # reads the data
@@ -59,14 +64,14 @@ class Recorder():
             path to H5py file
         
         """
-        
+        buffers = self.device.buffers
         # grab all the data in the circular buffer
-        gyro_data = self.device.buffers[GYRO].get_all()
-        accel_data = self.device.buffers[ACCEL].get_all()
-        depth_data = self.device.buffers[DEPTH].get_all()
-        infrared_data = self.device.buffers[INFRARED].get_all()
-        color_data = self.device.buffers[COLOR].get_all()
-        frameN_data = self.device.buffers[FRAMEN].get_all()
+        gyro_data = buffers[GYRO].get_all()
+        accel_data = buffers[ACCEL].get_all()
+        depth_data = buffers[DEPTH].get_all()
+        infrared_data = buffers[INFRARED].get_all()
+        color_data = buffers[COLOR].get_all()
+        frameN_data = buffers[FRAMEN].get_all()
 
         # write data in the H5PY file
         with h5py.File(filename, 'w') as f:
@@ -101,6 +106,7 @@ class Recorder():
         """
         Test that plays a live stream of depth color and infared for about 10 seconds
         """
+        from matplotlib import pyplot as plt
         plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
 
         for i in range(10):
@@ -155,4 +161,4 @@ import sys
 config_filename = (sys.argv[1])
 h5py_filename =  (sys.argv[2])
 recorder = Recorder(config_filename, h5py_filename)
-recorder.record(10)
+recorder.record()
