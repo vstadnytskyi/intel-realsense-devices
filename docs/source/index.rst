@@ -14,5 +14,6 @@ intel realsense devices Documentation
    device
    usage
    examples
+   recorder
    release-history
    min_versions
