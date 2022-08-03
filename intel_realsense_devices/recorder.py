@@ -55,8 +55,8 @@ class Recorder():
         ----------
         None
         """
-        last_frame = 0
-        buffer_length = self.device.buffers[FRAMEN].get_all().shape[0] 
+        last_frame = 0 
+        buffer_length = self.device.buffers[FRAMEN].get_all().shape[0] # gets the number of frames
         self.run = True
             
         while last_frame < buffer_length:
@@ -100,7 +100,7 @@ class Recorder():
 
     def stream_buffer(self):
         """
-        Test that plays a live stream of depth color and infared for about 10 seconds
+        stream data in the buffer as a replay
         """
         sleep(3)
         buffer_length = self.device.buffers[FRAMEN].get_all().shape[0] 
@@ -165,7 +165,6 @@ class Recorder():
             if color is not None:
                 cv2.imshow("Color", color)
             
-
             key = cv2.waitKey(10)
             if key != -1:
                 cv2.destroyAllWindows()
@@ -234,7 +233,7 @@ class Recorder():
    
     def read_h5py_file(self, filename):
         """
-        reads the hp5y file, For testing
+        reads the hp5y file data sets, For testing
         
         Parameters:
         ----------
@@ -246,9 +245,6 @@ class Recorder():
             # List all groups
             print("Keys: %s" % f.keys())
             a_group_key = list(f.keys())[0]
-
-            # Get the data
-            data = list(f[a_group_key])
 
 
 import sys
