@@ -1,5 +1,9 @@
-from time import time, sleep
 import h5py
+import cv2
+from time import sleep
+from matplotlib import pyplot as plt
+from intel_realsense_devices.helper import colorize
+plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
 
 DEPTH = "depth"
 COLOR = "color"
@@ -26,34 +30,178 @@ class Recorder():
         h5py_filename: string
             h5py file path
         """
+        self.h5py_filename = h5py_filename
         from intel_realsense_devices.device import Device
         self.device = Device(config_filename)
-        # self.driver = self.device.driver
         self.device.init()
+        self.driver = self.device.driver
+        self.run = None
 
-        self.h5py_filename = h5py_filename
+    def start(self):
+        """
+        Start the threads to collect and live stream data
+        """
+        from ubcs_auxiliary.multithreading import new_thread
+        threads = {}
+        self.device.start()
+        threads["record"] = new_thread(self.record)
+        self.cv2_live_stream()
 
     def record(self):
         """
-        Higher order function to collect data
+        Higher order function to collect data and save it to a h5py file
         
         Parameters
         ----------
-        time : int
-            time to colllect data
+        None
         """
-
-        self.device.start() # starts the threads
         last_frame = 0
-        buffer_length = self.device.buffers[FRAMEN].get_all().shape[0]
-
+        buffer_length = self.device.buffers[FRAMEN].get_all().shape[0] 
+        self.run = True
+            
         while last_frame < buffer_length:
             last_frame = self.device.buffers[FRAMEN].get_last_value()[0]
-        
-        self.device.stop() # shuts down the threads and piplines
-        
+            sleep(0.01)
+
+        self.run = False # shut down the live stream
+        self.device.stop() #shut down the device and stop the piplines
+
         self.save_h5py_file(self.h5py_filename) # saves the data into h5py file
-        self.read_h5py_file(self.h5py_filename) # reads the data
+        self.read_h5py_file(self.h5py_filename) # reads the data       
+
+    def plt_live_stream(self):
+        """
+        live stream of images using matplotlib 
+        """
+        while self.run:
+
+            plt.pause(.0001)
+            plt.subplot(131)
+            d = self.device.buffers[DEPTH].get_last_value()
+            depth = d[0,:,:]
+            plt.imshow(depth)
+
+            plt.title('Live depth')
+
+            plt.subplot(132)
+            c = self.device.buffers[COLOR].get_last_value()
+            color = c[0,:,:, :]
+            plt.imshow(color)
+
+            plt.title('Live color')
+
+            plt.subplot(133)
+            i = self.device.buffers[INFRARED].get_last_value()
+            infrared = i[0,:,:]
+            plt.imshow(infrared)
+            plt.title('Live infrared') 
+            sleep(0.25)
+        print("live stream ended")
+
+    def stream_buffer(self):
+        """
+        Test that plays a live stream of depth color and infared for about 10 seconds
+        """
+        sleep(3)
+        buffer_length = self.device.buffers[FRAMEN].get_all().shape[0] 
+
+        d = self.device.buffers[DEPTH].get_all()
+        c = self.device.buffers[COLOR].get_all()
+        inf = self.device.buffers[INFRARED].get_all()
+
+        for i in range(buffer_length):
+            # plt.pause(.0001)
+
+            # plt.subplot(131)
+            # plt.imshow(depth[i])
+            # plt.title('Live depth')
+
+            # plt.subplot(132)
+            # plt.imshow(color[i])
+            # plt.title('Live color')
+
+            # plt.subplot(133)
+            # plt.imshow(infrared[i])
+            # plt.title('Live infrared') 
+            
+            color = c[i]
+            depth = d[i]
+            infrared = inf[i]
+            
+            if depth is not None:
+                cv2.imshow("Depth", colorize(depth, (None, 5000)))
+            if infrared is not None:
+                cv2.imshow("IR", colorize(infrared, (None, 500), colormap=cv2.COLORMAP_JET))
+            if color is not None:
+                cv2.imshow("Color", color)
+
+            key = cv2.waitKey(10)
+            if key != -1:
+                cv2.destroyAllWindows()
+                self.run = False
+
+    def cv2_live_stream(self):
+        """
+        Live stream images using the cv2 lib
+        """
+        sleep(1)
+
+        while self.run:
+            
+            frames = self.device.buffers[FRAMEN].get_last_value()[0]
+            # print(f"CV2_live_stream at frame  {frames}")
+
+            d = self.device.buffers[DEPTH].get_last_value()
+            depth = d[0,:,:]
+            c = self.device.buffers[COLOR].get_last_value()
+            color = c[0,:,:, :]
+            i = self.device.buffers[INFRARED].get_last_value()
+            ir = i[0,:,:]
+
+            if depth is not None:
+                cv2.imshow("Depth", colorize(depth, (None, 5000)))
+            if ir is not None:
+                cv2.imshow("IR", colorize(ir, (None, 500), colormap=cv2.COLORMAP_JET))
+            if color is not None:
+                cv2.imshow("Color", color)
+            
+
+            key = cv2.waitKey(10)
+            if key != -1:
+                cv2.destroyAllWindows()
+                self.run = False
+
+        cv2.destroyAllWindows()
+
+    def show_live_plotting(self, N = -1, dt = 1):
+        """
+        shows live plotting of the gyro and accel data
+        """
+        from matplotlib import pyplot as plt
+        plt.ion()
+        fig = plt.figure(figsize = (4,6))
+        while self.device.run:
+            gyro_data = self.device.buffers[GYRO].get_all()
+            accel_data = self.device.buffers[ACCEL].get_all()
+            for i in range(3):
+                plt.subplot(611 + i)
+                plt.plot(gyro_data[:,0]-gyro_data[-1,0],gyro_data[:,i+2])
+                plt.xlim([-10,0])
+                axes = 'xyz'
+                plt.title(f'gyro: axis = {axes[i]}')
+
+            for i in range(3):
+                plt.subplot(614 + i)
+                plt.plot(accel_data[:,0]-accel_data[-1,0],accel_data[:,i+2])
+                plt.xlim([-10,0])
+                axes = 'xyz'
+                plt.title(f'accel: axis = {axes[i]}')
+            fig.tight_layout()
+            plt.pause(0.001)
+            plt.draw()
+            sleep(dt)
+            plt.clf()
+        self.device.stop()
 
     def save_h5py_file(self, filename):
         """
@@ -102,63 +250,12 @@ class Recorder():
             # Get the data
             data = list(f[a_group_key])
 
-    def live_stream_test(self):
-        """
-        Test that plays a live stream of depth color and infared for about 10 seconds
-        """
-        from matplotlib import pyplot as plt
-        plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
-
-        for i in range(10):
-            plt.pause(.0001)
-            plt.subplot(131)
-            plt.imshow(self.driver.get_images()['depth'])
-
-            plt.title('Live depth')
-
-            plt.subplot(132)
-            plt.imshow(self.driver.get_images()['color'])
-            plt.title('Live color')
-
-            plt.subplot(133)
-            plt.imshow(self.driver.get_images()['infrared'])
-            plt.title('Live infrared') 
-            sleep(1)
-
-    def show_live_plotting(self, N = -1, dt = 1):
-        """
-        shows live plotting of the gyro and accel data
-        """
-        from matplotlib import pyplot as plt
-        plt.ion()
-        self.device.start()
-        fig = plt.figure(figsize = (4,6))
-        while self.device.run:
-            gyro_data = self.device.buffers[GYRO].get_all()
-            accel_data = self.device.buffers[ACCEL].get_all()
-            for i in range(3):
-                plt.subplot(611 + i)
-                plt.plot(gyro_data[:,0]-gyro_data[-1,0],gyro_data[:,i+2])
-                plt.xlim([-10,0])
-                axes = 'xyz'
-                plt.title(f'gyro: axis = {axes[i]}')
-
-            for i in range(3):
-                plt.subplot(614 + i)
-                plt.plot(accel_data[:,0]-accel_data[-1,0],accel_data[:,i+2])
-                plt.xlim([-10,0])
-                axes = 'xyz'
-                plt.title(f'accel: axis = {axes[i]}')
-            fig.tight_layout()
-            plt.pause(0.001)
-            plt.draw()
-            sleep(dt)
-            plt.clf()
-        self.device.stop()
-    
 
 import sys
 config_filename = (sys.argv[1])
 h5py_filename =  (sys.argv[2])
 recorder = Recorder(config_filename, h5py_filename)
-recorder.record()
+recorder.start()
+
+print(f'Frame array {recorder.device.buffers[FRAMEN].get_all()}')
+recorder.stream_buffer()
