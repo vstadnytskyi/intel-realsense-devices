@@ -21,7 +21,8 @@ channels:
   - 
     type: infrared
     fps: 30
-    buffer_length: (480, 640)
+    buffer_length: 30
+    buffer_shape: (480, 640)
     buffer_dtype: unit8
 
   - 

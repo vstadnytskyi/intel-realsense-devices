@@ -270,7 +270,7 @@ class Driver():
         color = f.get_color_frame()
         infrared = f.get_infrared_frame()
         depth = f.get_depth_frame()
-
+        # print("frameN", frameN)
         color_img = np.asanyarray(color.get_data())
         ir_img = np.asanyarray(infrared.get_data())
         depth_img = np.asanyarray(depth.get_data())
@@ -323,4 +323,3 @@ if __name__ == "__main__":
         config_dict = yaml.safe_load(f)
         SN = config_dict["serial_number"]
         driver.init(config_dict , serial_number= SN)
-

@@ -36,8 +36,8 @@ class Device():
     """
     def __init__(self, config_filename):
         """
-        part 1 to iniatilie the camera
-
+        part 1 to initialize the camera
+        
         Parameters:
         ------------
         config_filename: string
@@ -80,7 +80,7 @@ class Device():
         else:
             channels = self.config_dict["channels"] # list of the channels
        
-    
+               
         # intialialize the circular buffer
         from circular_buffer_numpy.circular_buffer import CircularBuffer
         self.buffers[DEPTH] = CircularBuffer(shape = (channels[DEPTHCHANNEL][BUFFERLENGTH],)+ (480, 640), dtype = "uint16") 
@@ -89,7 +89,6 @@ class Device():
         self.buffers[GYRO] = CircularBuffer((channels[GYROCHANNEL][BUFFERLENGTH],5), dtype = 'float64')
         self.buffers[ACCEL] = CircularBuffer((channels[ACCELCHANNEL][BUFFERLENGTH],5), dtype = 'float64')
         self.buffers[FRAMEN] = CircularBuffer(shape = (channels[COLORCHANNEL][BUFFERLENGTH],), dtype = "int") 
-
 
     def read_config_file(self, config_filename):
         """
@@ -138,7 +137,6 @@ class Device():
         self.buffers[COLOR].append(img_data_dict[COLOR].reshape((1,) + img_data_dict[COLOR].shape))
         self.buffers[INFRARED].append(img_data_dict[INFRARED].reshape((1,) + img_data_dict[INFRARED].shape))
         self.buffers[FRAMEN].append(img_data_dict[FRAMEN].reshape((1)))
-        print(img_data_dict[FRAMEN])
 
     def run_once_gyroscope(self):
         """
@@ -243,6 +241,7 @@ if __name__ == "__main__":
 
     device = Device(config_filename = config_filename)
     device.init()
+
 
 
 
