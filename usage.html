@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; intel realsense devices 0.post116+g34be077 documentation</title>
+  <title>Usage &mdash; intel realsense devices 0.post128+gf9f4a98 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> intel realsense devices
           </a>
               <div class="version">
-                0.post116+g34be077
+                0.post128+gf9f4a98
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -50,11 +50,12 @@
 <li class="toctree-l1"><a class="reference internal" href="driver.html">Driver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="device.html">Device</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#collecting-data">Collecting Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recording-data">Recording Data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recorder.html">Recorder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recorder.html#other-functions">Other Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
 </ul>
@@ -86,9 +87,9 @@
   <section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
 <p>The driver class is configured to run for the realsense install L515 and D435i.
-it may run with other modules but some functionality will breakdown</p>
+it may run with other modules but some functionality will break down.</p>
 <p>You should be in the intel-realsense-devices directory.</p>
-<p>To intialize device:</p>
+<p>To initialize device:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">intel_realsense_devices</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;current version of the library is </span><span class="si">{</span><span class="n">intel_realsense_devices</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">intel_realsense_devices.device</span> <span class="kn">import</span> <span class="n">Device</span>
@@ -96,12 +97,11 @@ it may run with other modules but some functionality will breakdown</p>
 <span class="n">device</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Your config yaml file must contain a serial number and channels paramter in order to avoid
-using the defualt values. In the channels paremter there should be a dict for each frame type.
-This contains the buffer_length. This will be used as the size for the ciruclar buffer.</p>
-<p>Since the gyroscope and accelerometer collect data at a higher frequency the size of the
-circular buffer will need be accounted for.</p>
-<p>Please see config_template.conf for a more more descriptive structure.</p>
+<p>Your config yaml file must contain a serial number and channels parameter in order to avoid
+using the default values. In the channels parameter there should be a dict for each frame type.
+This contains the buffer_length. This will be used as the size for the circular buffer.</p>
+<p>Since the gyroscope and accelerometer collect data at a higher frequency the size of the circular buffer will need to be accounted for.</p>
+<p>Please see config_template.conf for a more descriptive structure.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;YOUR</span><span class="nv"> </span><span class="s">SERIAL</span><span class="nv"> </span><span class="s">NUMBER&quot;</span><span class="w"></span>
 <span class="nt">channels</span><span class="p">:</span><span class="w"></span>
 <span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="c1">#&lt;-this is first entry in the channels list</span><span class="w"></span>
@@ -111,15 +111,15 @@ circular buffer will need be accounted for.</p>
 </pre></div>
 </div>
 <p>For the D435i camera:
-Acceleation Output Data Rate 62.5Hz/250Hz
+Acceleration Output Data Rate 62.5Hz/250Hz
 Gyro Output Data Rate at 200Hz/400Hz</p>
 <p>For the L515 camera:
-Accelerometer Output Data Rate 100Hz/200Hz/400Hz
+Acceleration Output Data Rate 100Hz/200Hz/400Hz
 Gyroscope Output Data Rate 100Hz/200Hz/400Hz</p>
-<section id="collecting-data">
-<h2>Collecting Data<a class="headerlink" href="#collecting-data" title="Permalink to this heading">¶</a></h2>
+<section id="recording-data">
+<h2>Recording Data<a class="headerlink" href="#recording-data" title="Permalink to this heading">¶</a></h2>
 <p>All the functionality to collect data and store it in a file is already done for you in the record script.
-In order run it all you need is a config file and a h5py file to save data into.</p>
+In order to run it, you will need a config file and a h5py file to save data into.</p>
 <p>To collect the data run the following script.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># IT MUST BE IN THIS ORDER</span>
 <span class="n">python</span> <span class="n">recorder</span><span class="o">.</span><span class="n">py</span> <span class="s2">&quot;YOUR CONFIG FILE&quot;</span> <span class="s2">&quot;YOUR H5PY FILE&quot;</span>
