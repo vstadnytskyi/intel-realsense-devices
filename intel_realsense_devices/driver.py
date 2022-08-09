@@ -38,22 +38,29 @@ class Driver():
 
     def __init__(self):
         """
+        Create a context object. This object owns the handles to all connected realsense devices
         """
         self.pipeline = {}
         self.profile = {}
         self.conf = {}
         self.config_dict = {}
-        # Create a context object. This object owns the handles to all connected realsense devices
 
-    def init(self,config_dict, serial_number = ''):
+    def init(self, config_dict):
         """
         Method for Initalizing camera
         """
-        from logging import warn
+        from logging import warn, error
+        if "serial_number" not in config_dict:
+            error(" No serial_number paremter in configuration dictionary")
+            return 
+        
+        serial_number = config_dict["serial_number"]
+
         # check if SN matches 
         if not self.SN_match(serial_number):
             warn('camera with given serial number is not found')
             return
+            
         self.config_dict = config_dict
         
         # creates the piplines
@@ -152,9 +159,6 @@ class Driver():
         device_serial_number = str(self.device.get_info(rs.camera_info.serial_number))
         device_product_line = str(self.device.get_info(rs.camera_info.product_line))
         self.conf[IMAGE].enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-
-        gyro_fps = self.config_dict["channels"][GYROCHANNEL][FPS]
-        accel_fps = self.config_dict["channels"][ACCELCHANNEL][FPS]
         
 
         if device_product_line == 'L500':
@@ -170,9 +174,12 @@ class Driver():
         except Exception as e:
             error('during image configuratuon the following error occured',e)
 
-        if self.config_dict != None:
+        if self.config_dict["channels"] != None:
 
             try: 
+                gyro_fps = self.config_dict["channels"][GYROCHANNEL][FPS]
+                accel_fps = self.config_dict["channels"][ACCELCHANNEL][FPS]
+                
                 self.conf[ACCEL].enable_stream(rs.stream.accel,stream_index = 0,format = rs.format.motion_xyz32f, framerate = accel_fps)
                 self.conf[GYRO].enable_stream(rs.stream.gyro,stream_index = 0,format = rs.format.motion_xyz32f, framerate = gyro_fps)
 
@@ -321,5 +328,4 @@ if __name__ == "__main__":
     config_filename = "test_files\config_L151_f1320305.yaml"
     with open(config_filename) as f:
         config_dict = yaml.safe_load(f)
-        SN = config_dict["serial_number"]
-        driver.init(config_dict , serial_number= SN)
+        driver.init(config_dict)
