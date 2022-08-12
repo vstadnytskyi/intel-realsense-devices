@@ -222,15 +222,7 @@ if __name__ == "__main__":
     
     import sys
 
-    if len(sys.argv) > 1:
-        debug('reading specified config file')
-        config_filename = sys.argv[1]
-        info(config_filename)
-    else:
-        debug('reading default config file')
-        config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
-        info(config_filename)
-
+    config_filename = r"C:\Users\AR-VR lab W1\Documents\Valentyn\custom_python_libraries\intel-realsense-devices\intel_realsense_devices\test_files\config_d455_215122256135.yaml"
     from tempfile import gettempdir
     import os
     log_filename = os.path.join(gettempdir(),'intel_realsense_device.log')
