@@ -254,7 +254,7 @@ class Driver():
         Returns: nothing
         """
         from logging import error,warn,info,debug
-        if laser_power >= 0 and laser_power <= 100 :
+        if laser_power < 0 or laser_power > 100 :
             warn("Laser power must be between 0-100")
             return
 
