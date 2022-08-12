@@ -65,7 +65,7 @@ class Device():
 
         from intel_realsense_devices.driver import Driver
         self.driver = Driver()
-        self.driver.init(self.config_dict, serial_number = self.serial_number)
+        self.driver.init(self.config_dict)
 
         default_buffer_length = 10
         # if channels are empty
@@ -106,7 +106,7 @@ class Device():
             return
         with open(config_filename) as f:
             self.config_dict = yaml.safe_load(f)
-        self.serial_number = self.config_dict["serial_number"]
+            self.serial_number = self.config_dict["serial_number"]
         
 
     def start(self):
