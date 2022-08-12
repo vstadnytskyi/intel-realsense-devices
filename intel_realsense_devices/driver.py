@@ -38,23 +38,31 @@ class Driver():
 
     def __init__(self):
         """
+        Create a context object. This object owns the handles to all connected realsense devices
         """
         self.pipeline = {}
         self.profile = {}
         self.conf = {}
         self.config_dict = {}
-        # Create a context object. This object owns the handles to all connected realsense devices
 
-    def init(self,config_dict, serial_number = ''):
+    def init(self, config_dict):
         """
         Method for Initalizing camera
         """
-        from logging import warn
+        from logging import warn, error
+        if "serial_number" not in config_dict:
+            error(" No serial_number paremter in configuration dictionary")
+            return 
+        
+        serial_number = config_dict["serial_number"]
+
         # check if SN matches 
         if not self.SN_match(serial_number):
             warn('camera with given serial number is not found')
             return
+            
         self.config_dict = config_dict
+        
         # creates the piplines
         self.pipeline[ACCEL] = rs.pipeline()
         self.pipeline[GYRO] = rs.pipeline()
@@ -151,9 +159,6 @@ class Driver():
         device_serial_number = str(self.device.get_info(rs.camera_info.serial_number))
         device_product_line = str(self.device.get_info(rs.camera_info.product_line))
         self.conf[IMAGE].enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-
-        gyro_fps = self.config_dict["channels"][GYROCHANNEL][FPS]
-        accel_fps = self.config_dict["channels"][ACCELCHANNEL][FPS]
         
 
         if device_product_line == 'L500':
@@ -169,9 +174,12 @@ class Driver():
         except Exception as e:
             error('during image configuratuon the following error occured',e)
 
-        if self.config_dict != None:
+        if self.config_dict["channels"] != None:
 
             try: 
+                gyro_fps = self.config_dict["channels"][GYROCHANNEL][FPS]
+                accel_fps = self.config_dict["channels"][ACCELCHANNEL][FPS]
+                
                 self.conf[ACCEL].enable_stream(rs.stream.accel,stream_index = 0,format = rs.format.motion_xyz32f, framerate = accel_fps)
                 self.conf[GYRO].enable_stream(rs.stream.gyro,stream_index = 0,format = rs.format.motion_xyz32f, framerate = gyro_fps)
 
@@ -269,12 +277,12 @@ class Driver():
         color = f.get_color_frame()
         infrared = f.get_infrared_frame()
         depth = f.get_depth_frame()
-
+        # print("frameN", frameN)
         color_img = np.asanyarray(color.get_data())
         ir_img = np.asanyarray(infrared.get_data())
         depth_img = np.asanyarray(depth.get_data())
         FrameN_nparray = np.asanyarray(frameN)
-
+        
         return {COLOR: color_img, DEPTH : depth_img, INFRARED : ir_img , FRAMEN : FrameN_nparray}
         
     def get_image_dtype(self, frame_type):
@@ -293,29 +301,6 @@ class Driver():
         """
         return self.get_images()[frame_type].shape
     
-    def live_stream_test(self):
-        """
-        Test that plays a live stream of depth color and infared for about 10 seconds
-        """
-        from matplotlib import pyplot as plt
-        plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
-
-        for i in range(10):
-            plt.pause(.0001)
-            plt.subplot(131)
-            plt.imshow(self.get_images()['depth'])
-
-            plt.title('Live depth')
-
-            plt.subplot(132)
-            plt.imshow(self.get_images()['color'])
-            plt.title('Live color')
-
-            plt.subplot(133)
-            plt.imshow(self.get_images()['infrared'])
-            plt.title('Live infrared') 
-            time.sleep(.00125)
-
 if __name__ == "__main__":
     from tempfile import gettempdir
     import logging
@@ -339,10 +324,8 @@ if __name__ == "__main__":
     driver = Driver()
     # SN = "139522074713"
     # SN = "f1231322"
-    config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
-    # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_L151_f1320305.yaml"
+    # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
+    config_filename = "test_files\config_L151_f1320305.yaml"
     with open(config_filename) as f:
         config_dict = yaml.safe_load(f)
-        SN = config_dict["serial_number"]
-        driver.init(config_dict , serial_number= SN)
-        driver.live_stream_test()
+        driver.init(config_dict)
