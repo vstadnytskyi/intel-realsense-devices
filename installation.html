@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; intel realsense devices 0.post133+g7308fd2 documentation</title>
+  <title>Installation &mdash; intel realsense devices 0.post135+g33cfc39 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> intel realsense devices
           </a>
               <div class="version">
-                0.post133+g7308fd2
+                0.post135+g33cfc39
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -83,8 +83,20 @@
              
   <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
-<p>At the command line:</p>
+<p>This library can be installed from your local location on your computer. First, you would need to clone the repository in desired location. Second, run the following command at the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install -e .
+</pre></div>
+</div>
+<p>Currently, this library cannot be installed from PyPi but will be available in future. Please stay tuned…
+To install from PyPi at the command line:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install intel-realsense-devices
+</pre></div>
+</div>
+<p>To check if the library is correctly installed open python or ipython shell at the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ipython
+$ import intel-realsense-devices
+$ intel-realsense-devices.__version__
+$ intel-realsense-devices.__file__ #The last command should show you location of the folder on your harddrive. Confirm it is correct location.
 </pre></div>
 </div>
 </section>
