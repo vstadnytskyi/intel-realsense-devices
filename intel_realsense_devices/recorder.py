@@ -250,7 +250,7 @@ class Recorder():
         None
 
         """
-        with h5py.File(filename, "r") as f:
+        with h5py.File(self.h5py_filename, "r") as f:
             # List all groups
             print("Keys: %s" % f.keys())
             a_group_key = list(f.keys())[0]
