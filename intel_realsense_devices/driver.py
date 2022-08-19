@@ -255,7 +255,7 @@ class Driver():
         """
         from logging import error,warn,info,debug
         if laser_power < 0 or laser_power > 100 :
-            warn("Laser power must be between 0- 100")
+            warn("Laser power must be between 0-100")
             return
 
         for frame_type in self.profile.keys():

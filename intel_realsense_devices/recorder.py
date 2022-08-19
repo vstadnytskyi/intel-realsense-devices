@@ -2,6 +2,7 @@ import h5py
 import cv2
 from time import sleep
 from matplotlib import pyplot as plt
+from zmq import device
 from intel_realsense_devices.helper import colorize
 plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Otherwise you need to have plt.show() command
 
@@ -37,6 +38,7 @@ class Recorder():
         self.driver = self.device.driver
         self.run = None
 
+
     def start(self):
         """
         Start the threads to collect and live stream data
@@ -46,6 +48,12 @@ class Recorder():
         self.device.start()
         threads["record"] = new_thread(self.record)
         self.cv2_live_stream()
+
+    def stop(self):
+        self.device.stop() #shut down the device and stop the piplines
+        self.save_h5py_file() # saves the data into h5py file
+        self.read_h5py_file() # reads the data       
+
 
     def record(self):
         """
@@ -64,10 +72,6 @@ class Recorder():
             sleep(0.01)
 
         self.run = False # shut down the live stream
-        self.device.stop() #shut down the device and stop the piplines
-
-        self.save_h5py_file(self.h5py_filename) # saves the data into h5py file
-        self.read_h5py_file(self.h5py_filename) # reads the data       
 
     def plt_live_stream(self):
         """
@@ -110,19 +114,6 @@ class Recorder():
         inf = self.device.buffers[INFRARED].get_all()
 
         for i in range(buffer_length):
-            # plt.pause(.0001)
-
-            # plt.subplot(131)
-            # plt.imshow(depth[i])
-            # plt.title('Live depth')
-
-            # plt.subplot(132)
-            # plt.imshow(color[i])
-            # plt.title('Live color')
-
-            # plt.subplot(133)
-            # plt.imshow(infrared[i])
-            # plt.title('Live infrared') 
             
             color = c[i]
             depth = d[i]
@@ -172,6 +163,26 @@ class Recorder():
 
         cv2.destroyAllWindows()
 
+    def live_stream(self):
+        while True:
+            dict = self.device.driver.get_images()
+
+            color = dict[COLOR]
+            depth = dict[DEPTH]
+            infrared = dict[INFRARED]
+            
+            if depth is not None:
+                cv2.imshow("Depth", colorize(depth, (None, 5000)))
+            if infrared is not None:
+                cv2.imshow("IR", colorize(infrared, (None, 500), colormap=cv2.COLORMAP_JET))
+            if color is not None:
+                cv2.imshow("Color", color)
+
+            key = cv2.waitKey(10)
+            if key != -1:
+                cv2.destroyAllWindows()
+                self.run = False
+
     def show_live_plotting(self, N = -1, dt = 1):
         """
         shows live plotting of the gyro and accel data
@@ -202,13 +213,12 @@ class Recorder():
             plt.clf()
         self.device.stop()
 
-    def save_h5py_file(self, filename):
+    def save_h5py_file(self):
         """
         saves the data from the buffers into h5py file
         Parameters
         ----------
-        filename : string 
-            path to H5py file
+        None
         
         """
         buffers = self.device.buffers
@@ -221,7 +231,7 @@ class Recorder():
         frameN_data = buffers[FRAMEN].get_all()
 
         # write data in the H5PY file
-        with h5py.File(filename, 'w') as f:
+        with h5py.File(self.h5py_filename, 'w') as f:
             dset = f.create_dataset(GYRO, data = gyro_data)
             dset = f.create_dataset(ACCEL, data = accel_data)
             dset = f.create_dataset(DEPTH, data = depth_data)
@@ -231,27 +241,40 @@ class Recorder():
   
         f.close() # close the file
    
-    def read_h5py_file(self, filename):
+    def read_h5py_file(self):
         """
         reads the hp5y file data sets, For testing
         
         Parameters:
         ----------
-        filename : string
-            file path
+        None
 
         """
-        with h5py.File(filename, "r") as f:
+        with h5py.File(self.h5py_filename, "r") as f:
             # List all groups
             print("Keys: %s" % f.keys())
             a_group_key = list(f.keys())[0]
 
 
-import sys
-config_filename = (sys.argv[1])
-h5py_filename =  (sys.argv[2])
-recorder = Recorder(config_filename, h5py_filename)
-recorder.start()
+# import sys
+# config_filename = (sys.argv[1])
+# h5py_filename =  (sys.argv[2])
 
-print(f'Frame array {recorder.device.buffers[FRAMEN].get_all()}')
-recorder.stream_buffer()
+# config_filename = "test_files\config_L151_f1320305.yaml"
+# h5py_filename = "test_files\test.h5py"
+
+# recorder = Recorder(config_filename, h5py_filename)
+# recorder.start()
+
+# print(f'Frame array {recorder.device.buffers[FRAMEN].get_all()}')
+# recorder.live_stream()
+
+if __name__ == "__main__":
+    config_filename = "test_files\config_L151_f1320305.yaml"
+    h5py_filename = r"test_files\test2.h5py"
+
+    recorder = Recorder(config_filename, h5py_filename)
+    
+    recorder.start()
+    recorder.save_h5py_file()
+    recorder.stop()
