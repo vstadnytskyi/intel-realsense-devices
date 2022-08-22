@@ -55,6 +55,7 @@ class Recorder():
         orderly shutdown of the pipelines in the driver class.
         """
         self.device.stop() #shut down the device and stop the piplines
+        self.device.driver.stop()
     
     def record(self):
         """
@@ -71,7 +72,6 @@ class Recorder():
         while last_frame < buffer_length:
             last_frame = self.device.buffers[FRAMEN].get_last_value()[0]
             sleep(0.01)
-        print(self.device.buffers[FRAMEN].get_all())
         self.run = False # shut down the live stream
 
     def plt_live_stream(self):
