@@ -124,7 +124,6 @@ class Device():
         orderly stop of device operation
         """
         self.run = False 
-        self.driver.stop() #shuts down the piplines 
 
 
     def run_once_images(self):

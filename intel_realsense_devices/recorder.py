@@ -1,3 +1,4 @@
+import tempfile
 import h5py
 import cv2
 from time import sleep
@@ -50,11 +51,12 @@ class Recorder():
         self.cv2_live_stream()
 
     def stop(self):
+        """ 
+        orderly shutdown of the pipelines in the driver class.
+        """
         self.device.stop() #shut down the device and stop the piplines
-        self.save_h5py_file() # saves the data into h5py file
-        self.read_h5py_file() # reads the data       
-
-
+        self.device.driver.stop()
+    
     def record(self):
         """
         Higher order function to collect data and save it to a h5py file
@@ -70,7 +72,6 @@ class Recorder():
         while last_frame < buffer_length:
             last_frame = self.device.buffers[FRAMEN].get_last_value()[0]
             sleep(0.01)
-
         self.run = False # shut down the live stream
 
     def plt_live_stream(self):
@@ -133,7 +134,8 @@ class Recorder():
 
     def cv2_live_stream(self):
         """
-        Live stream images using the cv2 lib
+        Live stream images using the cv2 lib.
+        Used while collecting data.
         """
         sleep(1)
 
@@ -164,6 +166,10 @@ class Recorder():
         cv2.destroyAllWindows()
 
     def live_stream(self):
+        """
+        Live stream for testing purpose.
+        Ex: positioning the camera 
+        """
         while True:
             dict = self.device.driver.get_images()
 
@@ -232,11 +238,11 @@ class Recorder():
 
         # write data in the H5PY file
         with h5py.File(self.h5py_filename, 'w') as f:
-            dset = f.create_dataset(GYRO, data = gyro_data)
-            dset = f.create_dataset(ACCEL, data = accel_data)
-            dset = f.create_dataset(DEPTH, data = depth_data)
-            dset = f.create_dataset(COLOR, data = color_data)
+            # dset = f.create_dataset(GYRO, data = gyro_data)
+            # dset = f.create_dataset(ACCEL, data = accel_data)
+            # dset = f.create_dataset(COLOR, data = color_data)
             dset = f.create_dataset(INFRARED, data = infrared_data)
+            dset = f.create_dataset(DEPTH, data = depth_data)
             dset = f.create_dataset(FRAMEN, data = frameN_data)
   
         f.close() # close the file
@@ -270,11 +276,27 @@ class Recorder():
 # recorder.live_stream()
 
 if __name__ == "__main__":
-    config_filename = "test_files\config_L151_f1320305.yaml"
+    import os
+    # config_filename = "test_files\config_L515_f1231322.yaml"
+    config_filename = r"test_files\config_L151_f1320305.yaml"
     h5py_filename = r"test_files\test2.h5py"
-
     recorder = Recorder(config_filename, h5py_filename)
     
-    recorder.start()
+    recorder.start() 
     recorder.save_h5py_file()
     recorder.stop()
+    
+    from tempfile import gettempdir
+
+    # for i in range(1,6):
+    #     h5py_filename = os.path.join(gettempdir(), "file" + str(i))
+    #     recorder = Recorder(config_filename, h5py_filename)
+    #     recorder.device.driver.set_laser_intensity(i*25)
+    #     recorder.start() 
+    #     recorder.save_h5py_file()
+    #     recorder.stop()
+    #     # recorder.device.driver.hardware_reset()
+    #     print("print done with iteration ", i)
+
+    recorder.stream_buffer()
+    
