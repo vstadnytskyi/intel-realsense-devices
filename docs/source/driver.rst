@@ -2,6 +2,8 @@
 Driver
 ============
 
+* The driver class is configured to run for the realsense intel L515, D435i and D455 cameras.
+
 The driver class provides ...
 
 
@@ -25,8 +27,20 @@ To see if there are other devices currently connected to your PC
    
    print(driver.find_devices())
 
-In order to test if your device is connected and color umage and depth piplines are configured run:
+In order to test if your device is connected and color image and depth piplines are configured run:
 
 .. code-block:: python
    
    driver.live_stream_test()
+
+Set laser intensity function:
+
+.. code-block:: python
+   
+   driver.set_laser_intensity(laser_power = 100)
+
+
+If the laser intensity is too strong, the reciver will saturate similairly to
+how a image can be overexposed. If it's too weak the system to
+get any information. Adjusting the laser power manually may give better results considering 
+the specific distance and objects for the use case. 

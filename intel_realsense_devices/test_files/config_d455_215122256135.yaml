@@ -1,0 +1,35 @@
+name: 'augemented reality setup'
+model: 'Intel RealSense D455'
+serial_number: "215122256135"
+imgs_to_collect: 16
+img_fps: 30
+gyro_fps: 400
+accel_fps: 250
+
+
+channels:
+
+  - #<-this is first entry in the channels list
+    type: depth
+    fps: 30
+    buffer_length: 30
+
+  - #<-this is second entry in the channels list
+    type: color
+    fps: 30
+    buffer_length: 30
+
+  - 
+    type: infrared
+    fps: 30
+    buffer_length: 30
+
+  - 
+    type: accel
+    fps: 250
+    buffer_length: 30000
+
+  - 
+    type: gyro
+    fps: 400
+    buffer_length: 30000

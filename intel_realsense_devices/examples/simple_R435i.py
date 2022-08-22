@@ -64,12 +64,15 @@ plt.imshow(depth_image)
 plt.axvline(225)
 plt.axhline(200)
 plt.axhline(200)
-
+plt.pause(.01)
 plt.subplot(122)
 plt.imshow(color_image)
 t = time()
 plt.figure()
 plt.plot(depth_image[:350,220:225])
+
+plt.pause(10)
+plt.show()
 
 t=time()
 
@@ -83,5 +86,5 @@ def save_to(color_image,depth_image, t,filename):
     from ubcs_auxiliary.save_load_object import save_to_file
     save_to_file(filename,{'color':color_image,'depth':depth_image,'time':t})
 
-filename = r'C:\Users\AR-VR lab W1\Documents\Valentyn\data\intel D435i\scratch_435i_images.txt'
+filename = r'C:intel_realsense_devices\test_files\simple_R435i_py.txt'
 save_to(color_image,depth_image, t,filename)

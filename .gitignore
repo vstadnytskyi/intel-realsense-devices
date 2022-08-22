@@ -80,3 +80,8 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+intel_realsense_devices/test_files/test.h5py
+intel_realsense_devices/test_files/simple_R435i_py.txt
+intel_realsense_devices/test.h5py
+intel_realsense_devices/test_files/Laser_intensity_test.h5py
+intel_realsense_devices/test_files/test2.h5py

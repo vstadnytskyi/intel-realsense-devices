@@ -38,6 +38,13 @@ pvdb = {
         'prec' : 1,
         'count': width[DEPTH]*height[DEPTH],
     },
+    'frameN' : {
+        'value': 0,
+        'prec' : 0,
+        'scan' : .1,
+        'count': 1,
+        'unit': 's' 
+    },
     'dt' : {
         'value': 1.0,
         'prec' : 1,
@@ -64,22 +71,11 @@ class myDriver(Driver):
         import psutil
         while True:
             if self.io_push_queue is not None:
-        # while True:
-        #     self.new_arr = self.new_arr*0
-        #     self.new_arr[:,pos_w,:] = 255
-        #     self.new_arr[pos_h,:,:] = 255
-        #     if pos_w == (width-1):
-        #         pos_w = 0
-        #     else:
-        #         pos_w += 1
-        #     if pos_h == (height-1):
-        #         pos_h = 0
-        #     else:
-        #         pos_h += 1
-        #     self.setParam('image', self.new_arr.flatten())
-        #     self.updatePVs()
+                data = self.io_push_queue.get()
+                for key, value in data.items():
+                    self.setParam(key, value)
+                self.updatePVs()
 
-        #     sleep(self.getParam('dt'))
 
     def read(self, reason):
         from time import ctime, time

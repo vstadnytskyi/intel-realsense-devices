@@ -82,12 +82,7 @@ plt.ion() #interactive on - turns on interactive mode for matplotlib plots. Othe
 # plt.subplot(132)
 # plt.imshow(color_img)
 # plt.title('color image')
-
-# plt.subplot(133)
-# plt.imshow(ir_img)
-# plt.title('infrared image')
-
-
+ 
 plt.figure(figsize = (10,5))
 
 try:
