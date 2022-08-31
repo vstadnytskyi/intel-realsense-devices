@@ -249,13 +249,13 @@ class Driver():
 
     def set_laser_intensity(self, laser_power):
         """
-        Sets laser intensity for L515 depth camera  
+        Sets laser intensity for Intel realsense camera  
         Paramter: takes in laser power intensity
         Returns: nothing
         """
         from logging import error,warn,info,debug
-        if laser_power < 0 or laser_power > 100 :
-            warn("Laser power must be between 0-100")
+        if laser_power < 0 or laser_power > 360 :
+            warn("Laser power must be between 0-360")
             return
 
         for frame_type in self.profile.keys():

@@ -37,10 +37,11 @@ Set laser intensity function:
 
 .. code-block:: python
    
-   driver.set_laser_intensity(laser_power = 100)
+   driver.set_laser_intensity(laser_power = "int")
 
 
 If the laser intensity is too strong, the reciver will saturate similairly to
-how a image can be overexposed. If it's too weak the system to
-get any information. Adjusting the laser power manually may give better results considering 
-the specific distance and objects for the use case. 
+how a image can be overexposed. If it's too weak the system toget any information. 
+Adjusting the laser power manually may give better results considering 
+the specific distance and objects for the use case. The defualt/average value is 
+150 mw. The range is from 0-360.
