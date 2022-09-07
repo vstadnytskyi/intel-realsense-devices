@@ -84,9 +84,9 @@ class Device():
                
         # intialialize the circular buffer
         from circular_buffer_numpy.circular_buffer import CircularBuffer
-        self.buffers[DEPTH] = CircularBuffer(shape = (channels[DEPTHCHANNEL][BUFFERLENGTH],)+ (480, 640), dtype = "uint16") 
-        self.buffers[COLOR] = CircularBuffer(shape = (channels[COLORCHANNEL][BUFFERLENGTH],)+ (540, 960,3), dtype = "uint8") 
-        self.buffers[INFRARED] = CircularBuffer(shape = (channels[INFARAREDCHANNEL][BUFFERLENGTH],)+ (480, 640), dtype = "uint8") 
+        self.buffers[DEPTH] = CircularBuffer(shape = (channels[DEPTHCHANNEL][BUFFERLENGTH],)+ (480, 640), dtype = channels[DEPTHCHANNEL][BUFFERDTYPE]) 
+        self.buffers[COLOR] = CircularBuffer(shape = (channels[COLORCHANNEL][BUFFERLENGTH],)+ (540, 960,3), dtype = channels[COLORCHANNEL][BUFFERDTYPE]) 
+        self.buffers[INFRARED] = CircularBuffer(shape = (channels[INFARAREDCHANNEL][BUFFERLENGTH],)+ (480, 640), dtype = channels[INFARAREDCHANNEL][BUFFERDTYPE]) 
         self.buffers[GYRO] = CircularBuffer((channels[GYROCHANNEL][BUFFERLENGTH],5), dtype = 'float64')
         self.buffers[ACCEL] = CircularBuffer((channels[ACCELCHANNEL][BUFFERLENGTH],5), dtype = 'float64')
         self.buffers[FRAMEN] = CircularBuffer(shape = (channels[COLORCHANNEL][BUFFERLENGTH],), dtype = "int") 
