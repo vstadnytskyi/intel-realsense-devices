@@ -1,34 +1,43 @@
-Created documentation for configuration file.
-
 ===================
 Configuration File
 ===================
 
-There are two main key points of the configuration file. There must be serial number parameter and a channel parameter that is a list.
-There is a configuration file template in the test_file directory to model after. 
+There are two key parameters in a configuration file. There must be serial number parameter and a channel parameter that is a list.
 
-* THE PAREAMETER NAMES MUST BE KEPT THE SAME.
+* NOTE: There is a configuration file template in the test_file directory to model your file after. 
 
-* There must be a serial_number parameter.
-EX:
+Key Parameters
+--------------
+
+* THE PAREAMETER NAMES MUST BE KEPT THE SAME
+* There must be a serial number parameter
+* If a channel parameter is not provided, default values will be used
+
+Serial Number Parameter
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Code example:
 
 .. code-block:: yaml
 
     serial_number: "f1231322"
 
-=====================
-Channels parameter 
-=====================
+Channels Parameter 
+~~~~~~~~~~~~~~~~~~
+
+code example: 
 
 .. code-block:: yaml
 
     channels:
-      - #<- channel enter 
-
-- The Channel parameter is a list with each element containing a dictionary of parameters.
--  If a channel parameter is not defined then default values will be used.
-- There must be an entry for each different type of channel.
-- There are 5 parameter for an image channel, and 3 for the IMU. 
+      - #<- first channel entery
+        "parameter_name" : "parameter_key"
+      - #<- second channel entery
+        "parameter_name" : "parameter_key" 
+        
+* The Channel parameter is a list with each element containing a dictionary of parameters
+* There must be an entry for each different type of channel
+* There are 5 parameters for an image channel, and 3 for the IMU
 
 Example of an element:
 
@@ -42,15 +51,16 @@ Example of an element:
     buffer_dtype: unit16
 
 
-* NOTE: THE CHANNEL ENTERY ORDER MUST BE KEPT IN THE SAME ORDER.
+NOTE: THE CHANNEL ENTERY ORDER MUST BE KEPT IN THE SAME ORDER
 
-0 -> depth
-1 -> color
-2 -> infrared
-3 -> accel
-4 -> gyro
+* 0 -> depth
+* 1 -> color
+* 2 -> infrared
+* 3 -> accel
+* 4 -> gyro
 
-Example of a IMU entry. 
+
+Example of a IMU entry:
 
 .. code-block:: yaml
 
@@ -60,8 +70,8 @@ Example of a IMU entry.
     buffer_length: 30000
 
 
+Default values
+--------------
 
-* Default values
-
-- The buffer length will be set to 10 for images and 10000 for IMU data.
-- Accel default fps set to 200, Gyro default fps set to 400
+* The buffer length will be set to 10 for images and 10000 for IMU data
+* Accel default fps set to 200, Gyro default fps set to 400
