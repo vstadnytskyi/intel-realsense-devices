@@ -254,8 +254,8 @@ class Driver():
         Returns: nothing
         """
         from logging import error,warn,info,debug
-        if laser_power < 0 or laser_power > 360 :
-            warn("Laser power must be between 0-360")
+        if laser_power < 0 or laser_power > 100 :
+            warn("Laser power must be between 0-100")
             return
 
         for frame_type in self.profile.keys():
@@ -325,7 +325,9 @@ if __name__ == "__main__":
     # SN = "139522074713"
     # SN = "f1231322"
     # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
-    config_filename = "test_files\config_L151_f1320305.yaml"
+    config_filename = r"test_files\config_L151_f1231322.yaml"
+    config_filename = r"test_files\config_L515_f1231322.yaml"
+
     with open(config_filename) as f:
         config_dict = yaml.safe_load(f)
         driver.init(config_dict)
