@@ -1,3 +1,5 @@
+Created documentation for configuration file.
+
 ===================
 Configuration File
 ===================
@@ -21,11 +23,11 @@ Channels parameter
 .. code-block:: yaml
 
     channels:
-      - #<- channel entery 
+      - #<- channel enter 
 
-- The Channel parameter is a list with each element contaning a dictioniry of parameters.
-- If a channel parameter is not defined then default values will be used.
-- There must be an entry for each differnt type of channel.
+- The Channel parameter is a list with each element containing a dictionary of parameters.
+-  If a channel parameter is not defined then default values will be used.
+- There must be an entry for each different type of channel.
 - There are 5 parameter for an image channel, and 3 for the IMU. 
 
 Example of an element:
@@ -59,7 +61,7 @@ Example of a IMU entry.
 
 
 
-* Defualt values
+* Default values
 
 - The buffer length will be set to 10 for images and 10000 for IMU data.
-- Accel default fps set to 200, Gyro defualt fps set to 400
+- Accel default fps set to 200, Gyro default fps set to 400
