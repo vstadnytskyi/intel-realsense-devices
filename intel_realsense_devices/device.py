@@ -27,6 +27,7 @@ INFARAREDCHANNEL = 2
 ACCELCHANNEL = 3
 GYROCHANNEL = 4
 BUFFERLENGTH = "buffer_length"
+BUFFERDTYPE = "buffer_dtype"
 
 
 class Device():
@@ -71,11 +72,11 @@ class Device():
         # if channels are empty
         if self.config_dict["channels"] == None:
             channels = self.config_dict["channels"] = [
-                {'buffer_length': default_buffer_length},
-                {'buffer_length': default_buffer_length},
-                {'buffer_length': default_buffer_length},
-                {'buffer_length': default_buffer_length * 10000},
-                {'buffer_length': default_buffer_length * 10000}
+                {'buffer_length': default_buffer_length, BUFFERDTYPE : "unit16"},
+                {'buffer_length': default_buffer_length, BUFFERDTYPE : "unit8"},
+                {'buffer_length': default_buffer_length, BUFFERDTYPE : "unit8"},
+                {'buffer_length': default_buffer_length * 1000},
+                {'buffer_length': default_buffer_length * 1000}
             ]
         else:
             channels = self.config_dict["channels"] # list of the channels
@@ -83,9 +84,9 @@ class Device():
                
         # intialialize the circular buffer
         from circular_buffer_numpy.circular_buffer import CircularBuffer
-        self.buffers[DEPTH] = CircularBuffer(shape = (channels[DEPTHCHANNEL][BUFFERLENGTH],)+ (480, 640), dtype = "uint16") 
-        self.buffers[COLOR] = CircularBuffer(shape = (channels[COLORCHANNEL][BUFFERLENGTH],)+ (540, 960,3), dtype = "uint8") 
-        self.buffers[INFRARED] = CircularBuffer(shape = (channels[INFARAREDCHANNEL][BUFFERLENGTH],)+ (480, 640), dtype = "uint8") 
+        self.buffers[DEPTH] = CircularBuffer(shape = (channels[DEPTHCHANNEL][BUFFERLENGTH],)+ (480, 640), dtype = channels[DEPTHCHANNEL][BUFFERDTYPE]) 
+        self.buffers[COLOR] = CircularBuffer(shape = (channels[COLORCHANNEL][BUFFERLENGTH],)+ (540, 960,3), dtype = channels[DEPTHCHANNEL][BUFFERDTYPE]) 
+        self.buffers[INFRARED] = CircularBuffer(shape = (channels[INFARAREDCHANNEL][BUFFERLENGTH],)+ (480, 640), dtype = channels[DEPTHCHANNEL][BUFFERDTYPE]) 
         self.buffers[GYRO] = CircularBuffer((channels[GYROCHANNEL][BUFFERLENGTH],5), dtype = 'float64')
         self.buffers[ACCEL] = CircularBuffer((channels[ACCELCHANNEL][BUFFERLENGTH],5), dtype = 'float64')
         self.buffers[FRAMEN] = CircularBuffer(shape = (channels[COLORCHANNEL][BUFFERLENGTH],), dtype = "int") 
