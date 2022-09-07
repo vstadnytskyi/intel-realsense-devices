@@ -4,6 +4,9 @@ Driver
 
 * The driver class is configured to run for the realsense intel L515, D435i and D455 cameras.
 
+Driver is the lowest level that communicates with the camera. It sets up the pipelines for different channels
+to pull images/data from.
+
 To set up a driver:
 
 .. code-block:: python
