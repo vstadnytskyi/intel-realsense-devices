@@ -277,11 +277,12 @@ class Recorder():
 
 if __name__ == "__main__":
     import os
-    # config_filename = "test_files\config_L515_f1231322.yaml"
-    config_filename = r"test_files\config_L151_f1320305.yaml"
+    config_filename = "test_files\config_L515_f1231322.yaml"
+    # config_filename = r"test_files\config_L151_f1320305.yaml"
     h5py_filename = r"test_files\test2.h5py"
     recorder = Recorder(config_filename, h5py_filename)
-    
+    recorder.live_stream()
+
     recorder.start() 
     recorder.save_h5py_file()
     recorder.stop()
