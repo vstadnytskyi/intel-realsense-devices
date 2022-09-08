@@ -249,7 +249,7 @@ class Driver():
 
     def set_laser_intensity(self, laser_power):
         """
-        Sets laser intensity for L515 depth camera  
+        Sets laser intensity for Intel realsense camera  
         Paramter: takes in laser power intensity
         Returns: nothing
         """
@@ -325,7 +325,9 @@ if __name__ == "__main__":
     # SN = "139522074713"
     # SN = "f1231322"
     # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
-    config_filename = "test_files\config_L151_f1320305.yaml"
+    config_filename = r"test_files\config_L151_f1231322.yaml"
+    config_filename = r"test_files\config_L515_f1231322.yaml"
+
     with open(config_filename) as f:
         config_dict = yaml.safe_load(f)
         driver.init(config_dict)

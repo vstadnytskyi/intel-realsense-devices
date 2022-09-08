@@ -2,9 +2,9 @@
 Device
 ============
 
-Device is a higher level class that will contains functionality to collect data from the camrea. 
+Device is a higher level class that contains functionality to collect data from the camrea. 
 
-To intialize device:
+To set up and intialize device:
 
 .. code-block:: python
 
@@ -15,6 +15,7 @@ To intialize device:
    device.init()
 
 
-The main attriubtes of this class are the buffers and threads dicts. It runs multi-threads that continusly collect data
-from different pipelines such as gyroscope and accelerometer. It then stores them in a sepereate circular buffers. 
+The main attriubtes of this class are to set up the ciruclar buffers and run threads. 
+It runs multi-threads that continusly collect data from different pipelines. 
+It then stores them in a sepereate circular buffers. 
 
