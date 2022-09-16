@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Driver &mdash; intel realsense devices 0.post153+gc4eb23d documentation</title>
+  <title>Driver &mdash; intel realsense devices 0.post178+g5290733 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> intel realsense devices
           </a>
               <div class="version">
-                0.post153+gc4eb23d
+                0.post178+g5290733
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="recorder.html#other-functions">Other Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration_file.html">Configuration File</a></li>
 </ul>
 
         </div>
@@ -86,34 +87,39 @@
 <ul class="simple">
 <li><p>The driver class is configured to run for the realsense intel L515, D435i and D455 cameras.</p></li>
 </ul>
-<p>The driver class provides …</p>
+<p>Driver is the lowest level that communicates with the camera. It sets up the pipelines for different channels
+to pull images/data from.</p>
+<p>To set up a driver:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">intel_realsense_devices</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;current version of the library is </span><span class="si">{</span><span class="n">intel_realsense_devices</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">intel_realsense_devices.driver</span> <span class="kn">import</span> <span class="n">Driver</span>
-<span class="n">driver</span> <span class="o">=</span> <span class="n">Driver</span><span class="p">()</span>
-<span class="n">driver</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">serial_number</span><span class="o">=</span><span class="s2">&quot;YOUR SERIAL NUMBER&quot;</span><span class="p">)</span>
+<span class="n">config_filename</span> <span class="o">=</span> <span class="s2">&quot;YOUR CONFIG FILE NAME&quot;</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+   <span class="n">config_dict</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+   <span class="n">driver</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">config_dict</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To check what device current driver is connected</p>
+<p>To check what device current driver is connected:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">driver</span><span class="o">.</span><span class="n">print_device_info</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>To see if there are other devices currently connected to your PC</p>
+<p>To see if there are other devices currently connected to your PC:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">find_devices</span><span class="p">())</span>
 </pre></div>
 </div>
-<p>In order to test if your device is connected and color image and depth piplines are configured run:</p>
+<p>In order to test if your device is connected and color image and depth piplines are configured:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">driver</span><span class="o">.</span><span class="n">live_stream_test</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Set laser intensity function:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">driver</span><span class="o">.</span><span class="n">set_laser_intensity</span><span class="p">(</span><span class="n">laser_power</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">driver</span><span class="o">.</span><span class="n">set_laser_intensity</span><span class="p">(</span><span class="n">laser_power</span> <span class="o">=</span> <span class="s2">&quot;int&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If the laser intensity is too strong, the reciver will saturate similairly to
-how a image can be overexposed. If it’s too weak the system to
-get any information. Adjusting the laser power manually may give better results considering
-the specific distance and objects for the use case.</p>
+how a image can be overexposed. If it’s too weak the system fails to get any information.
+Adjusting the laser power manually may give better results considering
+the specific distance and objects for the use case.
+The defualt/average value of the laser is 150 mw. The range in which laser intensity can be set is from 0-100%.</p>
 </section>
 
 

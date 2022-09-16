@@ -17,3 +17,4 @@ intel realsense devices Documentation
    recorder
    release-history
    min_versions
+   configuration_file
