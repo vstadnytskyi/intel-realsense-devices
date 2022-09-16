@@ -18,3 +18,4 @@ intel realsense devices Documentation
    release-history
    min_versions
    configuration_file
+   stream

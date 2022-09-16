@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; intel realsense devices 0.post178+g48c0216 documentation</title>
+  <title>Usage &mdash; intel realsense devices 0.post188+g0c68f12 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
@@ -35,7 +35,7 @@
             <a href="index.html" class="icon icon-home"> intel realsense devices
           </a>
               <div class="version">
-                0.post178+g48c0216
+                0.post188+g0c68f12
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -50,15 +50,17 @@
 <li class="toctree-l1"><a class="reference internal" href="driver.html">Driver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="device.html">Device</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-system">Running the system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#imu-settings">IMU settings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#recording-data">Recording Data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recorder.html">Recorder</a></li>
-<li class="toctree-l1"><a class="reference internal" href="recorder.html#other-functions">Other Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release-history.html">Release History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="min_versions.html">Minimum Version of Python and NumPy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration_file.html">Configuration File</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream</a></li>
 </ul>
 
         </div>
@@ -87,9 +89,17 @@
              
   <section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
-<p>The driver class is configured to run for the realsense install L515 and D435i.
-it may run with other modules but some functionality will break down.</p>
-<p>You should be in the intel-realsense-devices directory.</p>
+<p>The driver class is deisgned to run the intel realsense cameras. It is speciically designed to run L151 and D435i.
+it may run with other models but some functionaity may break down.</p>
+<p>System design:</p>
+<ul class="simple">
+<li><p>Driver: The lowest level that communicates with the cameras.</p></li>
+<li><p>Device: Runs multi-threads to retrieve images then stores them into circular buffers.</p></li>
+<li><p>Recorder: Runs the whole system to collect and store data.</p></li>
+</ul>
+<section id="running-the-system">
+<h2>Running the system<a class="headerlink" href="#running-the-system" title="Permalink to this heading">¶</a></h2>
+<p>In order to run the applications, you should be in the intel-realsense-devices directory.</p>
 <p>To initialize device:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">intel_realsense_devices</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;current version of the library is </span><span class="si">{</span><span class="n">intel_realsense_devices</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -99,36 +109,34 @@ it may run with other modules but some functionality will break down.</p>
 </pre></div>
 </div>
 <p>Your config yaml file must contain a serial number and channels parameter in order to avoid
-using the default values. In the channels parameter there should be a dict for each frame type.
-This contains the buffer_length. This will be used as the size for the circular buffer.</p>
+using the default values. Please see configuration_file.rst for more information on structuring your config file.</p>
+</section>
+<section id="imu-settings">
+<h2>IMU settings<a class="headerlink" href="#imu-settings" title="Permalink to this heading">¶</a></h2>
 <p>Since the gyroscope and accelerometer collect data at a higher frequency the size of the circular buffer will need to be accounted for.</p>
-<p>Please see config_template.conf for a more descriptive structure.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">serial_number</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;YOUR</span><span class="nv"> </span><span class="s">SERIAL</span><span class="nv"> </span><span class="s">NUMBER&quot;</span><span class="w"></span>
-<span class="nt">channels</span><span class="p">:</span><span class="w"></span>
-<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="c1">#&lt;-this is first entry in the channels list</span><span class="w"></span>
-<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">depth</span><span class="w"> </span><span class="c1"># frame type</span><span class="w"></span>
-<span class="w">      </span><span class="nt">fps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
-<span class="w">      </span><span class="nt">buffer_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
-</pre></div>
-</div>
-<p>For the D435i camera:
-Acceleration Output Data Rate 62.5Hz/250Hz
-Gyro Output Data Rate at 200Hz/400Hz</p>
-<p>For the L515 camera:
-Acceleration Output Data Rate 100Hz/200Hz/400Hz
-Gyroscope Output Data Rate 100Hz/200Hz/400Hz</p>
+<p>For the D435i camera:</p>
+<ul class="simple">
+<li><p>Acceleration Output Data Rate 62.5Hz/250Hz</p></li>
+<li><p>Gyro Output Data Rate at 200Hz/400Hz</p></li>
+</ul>
+<p>For the L515 camera:</p>
+<ul class="simple">
+<li><p>Acceleration Output Data Rate 100Hz/200Hz/400Hz</p></li>
+<li><p>Gyroscope Output Data Rate 100Hz/200Hz/400Hz</p></li>
+</ul>
+</section>
 <section id="recording-data">
 <h2>Recording Data<a class="headerlink" href="#recording-data" title="Permalink to this heading">¶</a></h2>
 <p>All the functionality to collect data and store it in a file is already done for you in the record script.
 In order to run it, you will need a config file and a h5py file to save data into.</p>
-<p>To collect the data run the following script.</p>
+<p>To collect the data run the following script:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># IT MUST BE IN THIS ORDER</span>
 <span class="n">python</span> <span class="n">recorder</span><span class="o">.</span><span class="n">py</span> <span class="s2">&quot;YOUR CONFIG FILE&quot;</span> <span class="s2">&quot;YOUR H5PY FILE&quot;</span>
 <span class="c1"># my example</span>
 <span class="n">python</span> <span class="n">recorder</span><span class="o">.</span><span class="n">py</span> <span class="s2">&quot;test_files\config_L151_f1320305.yaml&quot;</span> <span class="s2">&quot;test_files</span><span class="se">\t</span><span class="s2">est.h5py&quot;</span>
 </pre></div>
 </div>
-<p>The data will be stored into a H5PY file where the data set names are [‘accel’, ‘color’, ‘depth’, ‘frameN’, ‘gyro’, ‘infrared’].</p>
+<p>The data will be stored into a H5PY file where the dataset names are [‘accel’, ‘color’, ‘depth’, ‘frameN’, ‘gyro’, ‘infrared’].</p>
 </section>
 </section>
 
