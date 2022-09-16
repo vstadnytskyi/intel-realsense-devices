@@ -86,7 +86,7 @@ class Stream():
                 cv2.destroyAllWindows()
                 self.run = False
 
-    def cv2_live_stream(self):
+    def cv2_live_stream_buffer(self):
         """
         Live stream images using the cv2 lib.
         Used while collecting data.
@@ -119,7 +119,7 @@ class Stream():
 
         cv2.destroyAllWindows()
 
-    def live_stream(self):
+    def Cv2_live_stream(self):
         """
         Stream live images from the camera
         """
@@ -144,7 +144,7 @@ class Stream():
                 cv2.destroyAllWindows()
                 self.run = False
 
-    def show_live_plotting(self, N = -1, dt = 1):
+    def IMU_live_plotting(self, N = -1, dt = 1):
         """
         shows live plotting of the gyro and accel data
         """
@@ -180,5 +180,5 @@ class Stream():
 if __name__ == "__main__":
     config_filename = "test_files\config_L515_f1231322.yaml"
     stream = Stream(config_filename)
-    stream.show_live_plotting()
+    stream.IMU_live_plotting()
 

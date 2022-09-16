@@ -51,7 +51,7 @@ class Recorder():
         from intel_realsense_devices.higher_applications.stream import Stream
 
         stream = Stream(self.config_filename)
-        stream.cv2_live_stream()
+        stream.cv2_live_stream_buffer()
 
     def stop(self):
         """ 
@@ -147,8 +147,13 @@ if __name__ == "__main__":
         info(config_filename, " " , h5py_filename)
 
     recorder = Recorder(config_filename, h5py_filename)
-
+    
     recorder.start() 
+    debug('Recorder started')
+
     recorder.save_h5py_file()
+    debug('Saved data into h5py file')
+
     recorder.stop()
+    debug('Orderly stop of the system')
 
