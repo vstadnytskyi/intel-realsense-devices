@@ -80,8 +80,8 @@ class Device():
             ]
         else:
             channels = self.config_dict["channels"] # list of the channels
-       
-               
+
+            
         # intialialize the circular buffer
         from circular_buffer_numpy.circular_buffer import CircularBuffer
         self.buffers[DEPTH] = CircularBuffer(shape = (channels[DEPTHCHANNEL][BUFFERLENGTH],)+ (480, 640), dtype = channels[DEPTHCHANNEL][BUFFERDTYPE]) 
@@ -229,6 +229,8 @@ if __name__ == "__main__":
     else:
         debug('reading default config file')
         config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
+        config_filename = "test_files\config_L515_f1231322.yaml"
+
         info(config_filename)
 
     from tempfile import gettempdir

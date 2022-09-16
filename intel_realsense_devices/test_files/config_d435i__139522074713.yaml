@@ -1,10 +1,6 @@
 name: 'augemented reality setup'
 model: 'Intel RealSense L515'
 serial_number: "139522074713"
-imgs_to_collect: 16
-img_fps: 30
-gyro_fps: 400
-accel_fps: 250
 
 
 channels:
@@ -13,20 +9,26 @@ channels:
     type: depth
     fps: 30
     buffer_length: 30
+    buffer_shape: (480, 640)
+    buffer_dtype: uint16
 
   - #<-this is second entry in the channels list
     type: color
     fps: 30
     buffer_length: 30
+    buffer_shape: (540, 960,3)
+    buffer_dtype: uint8
 
   - 
     type: infrared
     fps: 30
     buffer_length: 30
+    buffer_shape: (480, 640)
+    buffer_dtype: uint8
 
   - 
     type: accel
-    fps: 250
+    fps: 200
     buffer_length: 30000
 
   - 

@@ -153,7 +153,7 @@ class Driver():
 
     def configure(self):
         """
-        Enablles the stream for all configurations of the camera 
+        Enables the stream for all configurations of the camera 
         """
         from logging import error, warn, info, debug
         device_serial_number = str(self.device.get_info(rs.camera_info.serial_number))
@@ -287,7 +287,6 @@ class Driver():
         
     def get_image_dtype(self, frame_type):
         """ 
-        returns the image data type
         Parameter: Nothing
         Returns: image data type
         """
@@ -295,7 +294,6 @@ class Driver():
 
     def get_image_shape(self, frame_type):
         """ 
-        returns the image Shape
         Parameter: Nothing
         Returns: image Shape size 
         """
@@ -325,7 +323,7 @@ if __name__ == "__main__":
     # SN = "139522074713"
     # SN = "f1231322"
     # config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
-    config_filename = r"test_files\config_L151_f1231322.yaml"
+    config_filename = r"test_files\config_L515_f1320305.yaml"
     config_filename = r"test_files\config_L515_f1231322.yaml"
 
     with open(config_filename) as f:
