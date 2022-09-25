@@ -67,7 +67,6 @@ To collect the data run the following script:
 .. code-block:: python    
 
       import intel_realsense_devices
-
       # IT MUST BE IN THIS ORDER  
       python recorder.py "YOUR CONFIG FILE" "YOUR H5PY FILE"
       # my example
