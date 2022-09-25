@@ -37,15 +37,12 @@ class Device():
     """
     def __init__(self, config_filename):
         """
-        part 1 to iniatilie the camera
+        initialize all the attributes to set up the device
 
         Parameters:
         ------------
         config_filename: string
             config file path
-
-        h5py_filename: string
-            h5py file path
         """
 
         # Create a context object. This object owns the handles to all connected realsense devices  
@@ -229,7 +226,7 @@ if __name__ == "__main__":
     else:
         debug('reading default config file')
         config_filename = r"C:\Users\Abdel Nasser\Documents\L151 Camera\intel-realsense-devices\intel_realsense_devices\test_files\config_d435i__139522074713.yaml"
-        config_filename = "test_files\config_L515_f1231322.yaml"
+        # config_filename = "test_files\config_L515_f1231322.yaml"
 
         info(config_filename)
 
