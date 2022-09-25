@@ -10,24 +10,24 @@ These are the different functions that you can run:
 
  .. code-block:: python
 
-    record.plt_live_stream()
+    stream.plt_live_stream()
 
  * To show a live plot of the IMU readings:
 
   .. code-block:: python
 
-      record.IMU_live_plotting(dt = 1)
+      stream.IMU_live_plotting(dt = 1)
 
  * To stream data that is already stored into the buffer as a replay.
 
   .. code-block:: python
 
-      recorder.stream_buffer()
+      stream.stream_buffer()
 
  * To livestream the data as it is coming in from the circular buffers:
 
   .. code-block:: python
 
-      recorder.cv2_live_stream_buffer()
+      stream.cv2_live_stream_buffer()
 
 

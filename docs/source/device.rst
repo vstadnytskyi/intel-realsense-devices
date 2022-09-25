@@ -2,7 +2,7 @@
 Device
 ============
 
-Device is a higher level class that contains functionality to collect data from the camrea. 
+Device is a higher level class that contains functionality to collect data from the camera. 
 
 To set up and intialize device:
 

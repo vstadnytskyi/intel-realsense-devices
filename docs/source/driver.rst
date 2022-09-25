@@ -32,12 +32,6 @@ To see if there are other devices currently connected to your PC:
    
    print(driver.find_devices())
 
-In order to test if your device is connected and color image and depth piplines are configured:
-
-.. code-block:: python
-   
-   driver.live_stream_test()
-
 Set laser intensity function:
 
 .. code-block:: python
