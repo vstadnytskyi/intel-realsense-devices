@@ -48,10 +48,8 @@ class Recorder():
         self.device.start()
         threads["record"] = new_thread(self.record)
 
-        from intel_realsense_devices.higher_applications.stream import Stream
-
-        stream = Stream(self.config_filename)
-        stream.cv2_live_stream_buffer()
+        from intel_realsense_devices.higher_applications.stream import cv2_live_stream_buffer
+        cv2_live_stream_buffer(self.device)
 
     def stop(self):
         """ 
@@ -107,7 +105,7 @@ class Recorder():
    
     def read_h5py_file(self):
         """
-        reads the hp5y file data sets, For testing
+        reads the hp5y file data set name, For testing
         
         Parameters:
         ----------
