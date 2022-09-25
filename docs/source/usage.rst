@@ -65,6 +65,7 @@ In order to run it, you will need a config file and a h5py file to save data int
 To collect the data run the following script:
  
 .. code-block:: python    
+
       import intel_realsense_devices
 
       # IT MUST BE IN THIS ORDER  
