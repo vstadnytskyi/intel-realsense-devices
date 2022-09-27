@@ -65,12 +65,12 @@ In order to run it, you will need a config file and a h5py file to save data int
 To collect the data run the following script:
  
 .. code-block:: python    
-      import intel_realsense_devices
 
-      # IT MUST BE IN THIS ORDER  
-      python recorder.py "YOUR CONFIG FILE" "YOUR H5PY FILE"
-      # my example
-      python recorder.py "test_files\config_L151_f1320305.yaml" "test_files\test.h5py"
+   import intel_realsense_devices
+   # IT MUST BE IN THIS ORDER  
+   python recorder.py "YOUR CONFIG FILE" "YOUR H5PY FILE"
+   # my example
+   python recorder.py "test_files\config_L151_f1320305.yaml" "test_files\test.h5py"
  
  
 The data will be stored into a H5PY file where the dataset names are ['accel', 'color', 'depth', 'frameN', 'gyro', 'infrared'].
