@@ -15,6 +15,35 @@ ACCEL = "accel"
 IMAGE = "image"
 FRAMEN = "frameN"
 
+def cv2_live_stream_color_buffer(device):
+    """
+    Live stream images from the buffer via the cv2 lib.
+    Used while collecting data.
+
+    Paremeter:
+    ------------
+    Device Object
+    """
+    
+    buffer_length = device.buffers[FRAMEN].get_all().shape[0] # gets the number of frames
+            
+    while last_frame < buffer_length:
+        
+        last_frame = device.buffers[FRAMEN].get_last_value()[0]
+
+        c = device.buffers[COLOR].get_last_value()
+        color = c[0,:,:, :]
+
+        if color is not None:
+            cv2.imshow("Color", color)
+        
+        key = cv2.waitKey(10)
+        if key != -1:
+            cv2.destroyAllWindows()
+            run = False
+
+    cv2.destroyAllWindows()
+    
 class Stream():
     "Higher level application that can stream live data from the camera"
 
@@ -25,7 +54,7 @@ class Stream():
         self.driver = self.device.driver
         self.run = True
         
-    def plt_live_stream(self):
+    def plt_live_stream(self,):
         """
         live stream of images using matplotlib 
         """
@@ -86,7 +115,7 @@ class Stream():
                 cv2.destroyAllWindows()
                 self.run = False
 
-    def cv2_live_stream_buffer(self):
+    def cv2_live_stream_buffer(self,):
         """
         Live stream images using the cv2 lib.
         Used while collecting data.
@@ -94,9 +123,11 @@ class Stream():
         
         self.device.start()
 
-        while self.run:
+        last_frame = 0 
+        buffer_length = self.device.buffers[FRAMEN].get_all().shape[0] # gets the number of frames
             
-            frames = self.device.buffers[FRAMEN].get_last_value()[0]
+        while last_frame < buffer_length and self.run: 
+            last_frame = self.device.buffers[FRAMEN].get_last_value()[0]
 
             d = self.device.buffers[DEPTH].get_last_value()
             depth = d[0,:,:]
@@ -124,8 +155,8 @@ class Stream():
         Stream live images from the camera
         """
         self.device.start()
-
-        while True:
+        
+        while self.run:
             dict = self.device.driver.get_images()
 
             color = dict[COLOR]

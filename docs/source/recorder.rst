@@ -47,7 +47,7 @@ On the main thread it runs:
 This is a function in the stream module that live streams the last image insereted into the circular buffers.
 This uses the cv2 library instead of the matplotlib library. The cv2 library can render faster then the plt, 
 so there are no delays. This is also beneficiary as we won't have to worry about skipping frames due to the
-matplotlib taking time to render images.
+matplotlib taking longer time to render images.
  
 It then saves data into a H5py file with:
  
